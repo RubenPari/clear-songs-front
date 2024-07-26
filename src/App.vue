@@ -1,17 +1,15 @@
 <template>
   <div id="app">
-    <h1>{{ title }}</h1>
+    <Home />
   </div>
 </template>
 
 <script>
+import Home from '@/views/Home.vue'
+
 export default {
   name: 'App',
-  data() {
-    return {
-      title: 'La Mia Nuova App Vue'
-    }
-  }
+  components: { Home }
 }
 </script>
 
