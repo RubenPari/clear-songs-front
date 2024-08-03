@@ -1,8 +1,14 @@
 <template>
   <nav class="bottom-navbar">
+    <!-- Home -->
     <router-link to="/" class="nav-item">
       <i class="fas fa-home"></i>
       <span>Home</span>
+    </router-link>
+    <!-- Summary -->
+    <router-link to="/summary" class="nav-item">
+      <i class="fas fa-solid fa-list"></i>
+      <span>Summary</span>
     </router-link>
     <router-link to="/login" class="nav-item">
       <i class="fas fa-user"></i>
@@ -45,5 +51,17 @@ export default {
 
 .nav-item span {
   font-size: 12px;
+}
+
+.nav-item.active i {
+  color: #1db954;
+}
+
+.nav-item.active span {
+  color: #1db954;
+}
+
+.nav-item.active i {
+  color: #1db954;
 }
 </style>
