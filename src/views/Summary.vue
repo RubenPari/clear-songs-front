@@ -1,10 +1,8 @@
 <template>
   <div class="artist-grid">
-    <ArtistCard
-      v-for="artist in artists"
-      :key="artist.id"
-      :artist="artist"
-    />
+    <div v-for="artist in artists" :key="artist.id" class="grid-item">
+      <ArtistCard :artist="artist" />
+    </div>
   </div>
 </template>
 
@@ -82,33 +80,22 @@ export default {
 <style scoped>
 .artist-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 20px;
-  justify-content: center;
   padding: 20px;
 }
 
-@media (max-width: 1200px) {
-  .artist-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
+.grid-item {
+  width: 100%;
 }
 
-@media (max-width: 992px) {
-  .artist-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+.artist-grid > * {
+  flex-basis: calc(20% - 16px);
+  margin-bottom: 30px;
 }
 
-@media (max-width: 768px) {
-  .artist-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 480px) {
-  .artist-grid {
-    grid-template-columns: 1fr;
-  }
+.artist-grid::after {
+  content: "";
+  flex: auto;
 }
 </style>

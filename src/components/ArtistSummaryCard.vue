@@ -5,7 +5,7 @@
     </div>
     <div class="info-container">
       <span class="artist-name">{{ artist.name }}</span>
-      <span class="track-count">{{ artist.trackCount }} brani</span>
+      <span class="track-count">{{ artist.trackCount }}</span>
     </div>
   </div>
 </template>
@@ -27,9 +27,8 @@ export default {
 
 <style scoped>
 .artist-card {
-  width: 200px;
-  max-width: 100%;
-  margin: 0 auto;
+  width: 100%;
+  height: 350px;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -40,42 +39,37 @@ export default {
 
 .image-container {
   width: 100%;
-  height: 200px;
+  flex-grow: 1;
+  position: relative;
   overflow: hidden;
 }
 
 .artist-photo {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
 .info-container {
+  padding: 10px;
+  background-color: #f8f8f8;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 15px;
-  min-height: 80px;
-  background-color: #f0f0f0;
-  flex-grow: 1;
+  gap: 15px;
 }
 
 .artist-name {
   font-weight: bold;
-  font-size: 18px;
-  margin-bottom: 5px;
-  text-align: center;
-  color: #333;
-  font-family: 'Arial', sans-serif;
-  width: 100%;
-  overflow-wrap: break-word;
+  font-size: 38px;
+  display: block;
 }
 
 .track-count {
-  font-size: 16px;
-  color: #666;
-  font-weight: 500;
-  text-align: center;
+  font-weight: bold;
+  font-size: 30px;
+  color: #1e8a1c;
 }
 </style>
