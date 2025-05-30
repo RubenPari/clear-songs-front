@@ -1,0 +1,12 @@
+<div class="artist-summary-card">
+  <div class="artist-summary-card-image">
+    <img [src]="artist.imageUrl" alt="Artist Image" class="artist-summary-card-photo">
+  </div>
+  <div class="artist-summary-card-info">
+    <h3 class="artist-summary-card-name">{{ artist.name }}</h3>
+    <p class="artist-summary-card-tracks">
+      <span class="artist-summary-card-count">{{ artist.tracksCount }}</span>
+      <span class="artist-summary-card-label">{{ artist.tracksCount === 1 ? 'traccia' : 'tracce' }}</span>
+    </p>
+  </div>
+</div>
