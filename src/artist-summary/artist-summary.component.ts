@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import ArtistSummary from '../artist-summary/ArtistSummary';
+import ArtistSummary from './artist-summary.model';
 
 @Component({
   selector: 'app-artist-summary',
