@@ -1,0 +1,35 @@
+<div class="artists-container">
+  <h2 class="section-title">{{ title }}</h2>
+
+  <div class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Caricamento artisti in corso...</p>
+  </div>
+
+  <div class="no-results">
+    <p>Nessun artista trovato</p>
+  </div>
+
+  <div class="artists-list">
+    <app-artist-summary
+      [artist]="artist"
+      (click)="onArtistSelect(artist)"
+    />
+  </div>
+
+  <div class="pagination-controls">
+    <button
+      [disabled]="currentPage === 1"
+      (click)="changePage(currentPage - 1)"
+      class="pagination-btn">
+      Precendente
+    </button>
+    <span class="page-info"> Pagina {{ currentPage }} di {{ totalPages }}</span>
+    <button
+      [disabled]="currentPage === totalPages"
+      (click)="changesPage(currentPage + 1)"
+      class="pagination-btn">
+      Successiva
+    </button>
+  </div>
+</div>
