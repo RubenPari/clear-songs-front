@@ -1,0 +1,84 @@
+<div class="dashboard-container">
+  <div class="header">
+    <h1>Library Overview</h1>
+    <button mat-raised-button color="primary" (click)="loadTrackSummary()">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+  </div>
+
+  <div class="stats-cards">
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-value">{{ totalArtists }}</div>
+        <div class="stat-label">Total Artists</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-value">{{ totalTracks }}</div>
+        <div class="stat-label">Total Tracks</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-value">{{ totalTracks / totalArtists | number : '1.1-1' }}</div>
+        <div class="stat-label">Avg Tracks/Artist</div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <mat-card class="table-card">
+    <mat-card-header>
+      <mat-card-title>Artists Summary</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search artists</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Type to search..." />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <div class="table-container">
+        <table mat-table [dataSource]="dataSource" matSort class="full-width">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Artist Name</th>
+            <td mat-cell *matCellDef="let artist">{{ artist.name }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="count">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Track Count</th>
+            <td mat-cell *matCellDef="let artist">
+              <mat-chip-set>
+                <mat-chip [color]="artist.count > 20 ? 'accent' : 'primary'">
+                  {{ artist.count }}
+                </mat-chip>
+              </mat-chip-set>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let artist">
+              <button
+                mat-icon-button
+                color="warn"
+                (click)="deleteArtistTracks(artist)"
+                matTooltip="Delete all tracks from this artist"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+
+      <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons> </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</div>
