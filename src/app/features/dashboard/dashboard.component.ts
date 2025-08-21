@@ -11,6 +11,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatChipsModule } from '@angular/material/chips';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartOptions, ChartType, ChartData } from 'chart.js';
+
 import { ArtistSummary } from '../../core/models/artist.model';
 import { TrackService } from '../../core/services/track.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -34,7 +37,8 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/c
     MatIconModule,
     MatProgressSpinnerModule,
     MatDialogModule,
-    MatChipsModule
+    MatChipsModule,
+    BaseChartDirective
   ]
 })
 export class DashboardComponent implements OnInit {
@@ -42,6 +46,21 @@ export class DashboardComponent implements OnInit {
   dataSource!: MatTableDataSource<ArtistSummary>;
   totalTracks = 0;
   totalArtists = 0;
+
+  // Chart properties
+  public barChartOptions: ChartOptions = {
+    responsive: true,
+    scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { display: false } } },
+    plugins: { legend: { display: false } }
+  };
+  public barChartType: ChartType = 'bar';
+  public barChartLegend = false;
+  public barChartData: ChartData<'bar', number[], string | string[]> = {
+    labels: [],
+    datasets: [
+      { data: [], label: 'Tracks', backgroundColor: '#3f51b5', hoverBackgroundColor: '#3f51b5' },
+    ]
+  };
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -65,6 +84,7 @@ export class DashboardComponent implements OnInit {
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
         this.calculateStats(data);
+        this.setupChart(data);
         this.loadingService.hide();
       },
       error: (error) => {
@@ -77,6 +97,12 @@ export class DashboardComponent implements OnInit {
   calculateStats(data: ArtistSummary[]): void {
     this.totalArtists = data.length;
     this.totalTracks = data.reduce((sum, artist) => sum + artist.count, 0);
+  }
+
+  setupChart(data: ArtistSummary[]): void {
+    const sortedArtists = [...data].sort((a, b) => b.count - a.count).slice(0, 5);
+    this.barChartData.labels = sortedArtists.map(artist => artist.name);
+    this.barChartData.datasets[0].data = sortedArtists.map(artist => artist.count);
   }
 
   applyFilter(event: Event): void {

@@ -7,27 +7,42 @@
     </button>
   </div>
 
-  <div class="stats-cards">
-    <mat-card class="stat-card">
+  <div class="dashboard-grid">
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>Top 5 Artists by Track Count</mat-card-title>
+      </mat-card-header>
       <mat-card-content>
-        <div class="stat-value">{{ totalArtists }}</div>
-        <div class="stat-label">Total Artists</div>
+        <canvas baseChart
+          [data]="barChartData"
+          [options]="barChartOptions"
+          [type]="barChartType">
+        </canvas>
       </mat-card-content>
     </mat-card>
 
-    <mat-card class="stat-card">
-      <mat-card-content>
-        <div class="stat-value">{{ totalTracks }}</div>
-        <div class="stat-label">Total Tracks</div>
-      </mat-card-content>
-    </mat-card>
+    <div class="stats-cards">
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-value">{{ totalArtists }}</div>
+          <div class="stat-label">Total Artists</div>
+        </mat-card-content>
+      </mat-card>
 
-    <mat-card class="stat-card">
-      <mat-card-content>
-        <div class="stat-value">{{ totalTracks / totalArtists | number : '1.1-1' }}</div>
-        <div class="stat-label">Avg Tracks/Artist</div>
-      </mat-card-content>
-    </mat-card>
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-value">{{ totalTracks }}</div>
+          <div class="stat-label">Total Tracks</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-value">{{ totalTracks / totalArtists | number : '1.1-1' }}</div>
+          <div class="stat-label">Avg Tracks/Artist</div>
+        </mat-card-content>
+      </mat-card>
+    </div>
   </div>
 
   <mat-card class="table-card">
@@ -41,7 +56,13 @@
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
 
-      <div class="table-container">
+      <div class="empty-state" *ngIf="dataSource && dataSource.data.length === 0">
+        <mat-icon class="empty-state-icon">music_note</mat-icon>
+        <p class="empty-state-message">No artists found in your library.</p>
+        <p class="empty-state-suggestion">Start by adding some tracks!</p>
+      </div>
+
+      <div class="table-container" *ngIf="dataSource && dataSource.data.length > 0">
         <table mat-table [dataSource]="dataSource" matSort class="full-width">
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Artist Name</th>
