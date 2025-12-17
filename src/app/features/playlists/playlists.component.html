@@ -1,0 +1,151 @@
+<div class="playlist-management">
+  <div class="page-title">
+    <div>
+      <h1>Playlist Management</h1>
+      <p>Execute the bulk playlist operations exposed by the Clear Songs backend.</p>
+    </div>
+    <button mat-stroked-button color="primary" type="button" (click)="resetForm()">
+      <mat-icon>refresh</mat-icon>
+      Reset form
+    </button>
+  </div>
+
+  <div class="loading-banner" *ngIf="loadingService.loading$ | async">
+    <mat-spinner diameter="28"></mat-spinner>
+    <span>Processing playlist operation...</span>
+  </div>
+
+  <div class="management-grid">
+    <mat-card class="form-card">
+      <mat-card-header>
+        <mat-card-title>Target playlist</mat-card-title>
+        <mat-card-subtitle>Paste the Spotify playlist ID you want to clean</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="playlistForm">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Playlist ID</mat-label>
+            <input
+              matInput
+              formControlName="playlistId"
+              placeholder="37i9dQZF1DXcBWIGoYBM5M"
+              autocomplete="off"
+            />
+            <button
+              mat-icon-button
+              type="button"
+              matSuffix
+              aria-label="Clear playlist id"
+              *ngIf="playlistIdControl?.value"
+              (click)="playlistForm.patchValue({ playlistId: '' })"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+            <mat-hint>Use the alphanumeric ID from the Spotify playlist URL.</mat-hint>
+            <mat-error *ngIf="playlistIdControl?.hasError('required')">
+              Playlist ID is required
+            </mat-error>
+            <mat-error *ngIf="playlistIdControl?.hasError('pattern')">
+              Spotify IDs only contain letters and numbers
+            </mat-error>
+            <mat-error *ngIf="playlistIdControl?.hasError('minlength')">
+              Playlist ID looks too short
+            </mat-error>
+          </mat-form-field>
+
+          <div class="samples" *ngIf="samplePlaylists.length">
+            <span>Quick samples:</span>
+            <div class="sample-buttons">
+              <button
+                mat-stroked-button
+                type="button"
+                *ngFor="let sample of samplePlaylists"
+                (click)="fillExample(sample.id)"
+              >
+                {{ sample.label }}
+              </button>
+            </div>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <div class="actions">
+            <button
+              mat-raised-button
+              color="primary"
+              type="button"
+              [disabled]="playlistForm.invalid || (loadingService.loading$ | async)"
+              (click)="handleAction('playlist')"
+            >
+              <mat-icon>playlist_remove</mat-icon>
+              Clear playlist
+            </button>
+            <button
+              mat-raised-button
+              color="warn"
+              type="button"
+              [disabled]="playlistForm.invalid || (loadingService.loading$ | async)"
+              (click)="handleAction('playlistAndLibrary')"
+              matTooltip="Also removes the same tracks from your saved library"
+            >
+              <mat-icon>library_music</mat-icon>
+              Clear playlist &amp; library
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="info-card">
+      <mat-card-header>
+        <mat-card-title>Operation details</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-row">
+          <mat-icon color="primary">playlist_remove</mat-icon>
+          <div>
+            <h4>Clear playlist</h4>
+            <p>Deletes every track from the selected playlist but keeps them in your liked songs.</p>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="info-row warning">
+          <mat-icon color="warn">warning_amber</mat-icon>
+          <div>
+            <h4>Clear playlist &amp; library</h4>
+            <p>
+              Deletes tracks from both the playlist and your saved library. The Go backend stores a backup
+              before removal so you can recover songs when needed.
+            </p>
+          </div>
+        </div>
+
+        <ul class="tips">
+          <li>You must own or control the playlist to delete its tracks.</li>
+          <li>Keep this tab open until the request finishes.</li>
+          <li>Large playlists may take a few seconds due to Spotify rate limits.</li>
+        </ul>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <mat-card class="status-card" *ngIf="lastOperation">
+    <mat-card-header>
+      <mat-card-title>Last operation</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="status-content">
+        <mat-icon [class.warn-icon]="lastOperation.action === 'playlistAndLibrary'">history</mat-icon>
+        <div>
+          <div class="status-text">
+            {{ lastOperation.action === 'playlist' ? 'Cleared playlist tracks' : 'Cleared playlist and library' }}
+          </div>
+          <div class="status-subtext">Playlist ID: <code>{{ lastOperation.playlistId }}</code></div>
+          <div class="status-subtext">{{ lastOperation.timestamp | date: 'medium' }}</div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
