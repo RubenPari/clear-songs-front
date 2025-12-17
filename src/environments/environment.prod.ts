@@ -1,6 +1,8 @@
+import { environmentAuto } from './environment.auto';
+
 export const environment = {
   production: true,
-  apiUrl: 'https://your-production-api.com',
-  spotifyClientId: 'YOUR_SPOTIFY_CLIENT_ID',
-  spotifyRedirectUri: 'https://your-production-url.com/callback'
+  apiUrl: environmentAuto.apiUrl,
+  spotifyClientId: environmentAuto.spotifyClientId,
+  spotifyRedirectUri: environmentAuto.spotifyRedirectUri,
 };

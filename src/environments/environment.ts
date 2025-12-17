@@ -1,6 +1,8 @@
+import { environmentAuto } from './environment.auto';
+
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000',
-  spotifyClientId: 'YOUR_SPOTIFY_CLIENT_ID',
-  spotifyRedirectUri: 'http://localhost:4200/callback',
+  apiUrl: environmentAuto.apiUrl,
+  spotifyClientId: environmentAuto.spotifyClientId,
+  spotifyRedirectUri: environmentAuto.spotifyRedirectUri,
 };
