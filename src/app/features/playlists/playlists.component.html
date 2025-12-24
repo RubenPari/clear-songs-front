@@ -10,10 +10,12 @@
     </button>
   </div>
 
-  <div class="loading-banner" *ngIf="loadingService.loading$ | async">
-    <mat-spinner diameter="28"></mat-spinner>
-    <span>Processing playlist operation...</span>
-  </div>
+  @if (loadingService.loading()) {
+    <div class="loading-banner">
+      <mat-spinner diameter="28"></mat-spinner>
+      <span>Processing playlist operation...</span>
+    </div>
+  }
 
   <div class="management-grid">
     <mat-card class="form-card">
@@ -31,41 +33,45 @@
               placeholder="37i9dQZF1DXcBWIGoYBM5M"
               autocomplete="off"
             />
-            <button
-              mat-icon-button
-              type="button"
-              matSuffix
-              aria-label="Clear playlist id"
-              *ngIf="playlistIdControl?.value"
-              (click)="playlistForm.patchValue({ playlistId: '' })"
-            >
-              <mat-icon>close</mat-icon>
-            </button>
+            @if (playlistIdControl?.value) {
+              <button
+                mat-icon-button
+                type="button"
+                matSuffix
+                aria-label="Clear playlist id"
+                (click)="playlistForm.patchValue({ playlistId: '' })"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
+            }
             <mat-hint>Use the alphanumeric ID from the Spotify playlist URL.</mat-hint>
-            <mat-error *ngIf="playlistIdControl?.hasError('required')">
-              Playlist ID is required
-            </mat-error>
-            <mat-error *ngIf="playlistIdControl?.hasError('pattern')">
-              Spotify IDs only contain letters and numbers
-            </mat-error>
-            <mat-error *ngIf="playlistIdControl?.hasError('minlength')">
-              Playlist ID looks too short
-            </mat-error>
+            @if (playlistIdControl?.hasError('required')) {
+              <mat-error>Playlist ID is required</mat-error>
+            }
+            @if (playlistIdControl?.hasError('pattern')) {
+              <mat-error>Spotify IDs only contain letters and numbers</mat-error>
+            }
+            @if (playlistIdControl?.hasError('minlength')) {
+              <mat-error>Playlist ID looks too short</mat-error>
+            }
           </mat-form-field>
 
-          <div class="samples" *ngIf="samplePlaylists.length">
-            <span>Quick samples:</span>
-            <div class="sample-buttons">
-              <button
-                mat-stroked-button
-                type="button"
-                *ngFor="let sample of samplePlaylists"
-                (click)="fillExample(sample.id)"
-              >
-                {{ sample.label }}
-              </button>
+          @if (samplePlaylists.length) {
+            <div class="samples">
+              <span>Quick samples:</span>
+              <div class="sample-buttons">
+                @for (sample of samplePlaylists; track sample.id) {
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    (click)="fillExample(sample.id)"
+                  >
+                    {{ sample.label }}
+                  </button>
+                }
+              </div>
             </div>
-          </div>
+          }
 
           <mat-divider></mat-divider>
 
@@ -74,7 +80,7 @@
               mat-raised-button
               color="primary"
               type="button"
-              [disabled]="playlistForm.invalid || (loadingService.loading$ | async)"
+              [disabled]="playlistForm.invalid || loadingService.loading()"
               (click)="handleAction('playlist')"
             >
               <mat-icon>playlist_remove</mat-icon>
@@ -84,7 +90,7 @@
               mat-raised-button
               color="warn"
               type="button"
-              [disabled]="playlistForm.invalid || (loadingService.loading$ | async)"
+              [disabled]="playlistForm.invalid || loadingService.loading()"
               (click)="handleAction('playlistAndLibrary')"
               matTooltip="Also removes the same tracks from your saved library"
             >
@@ -131,7 +137,8 @@
     </mat-card>
   </div>
 
-  <mat-card class="status-card" *ngIf="lastOperation">
+  @if (lastOperation) {
+    <mat-card class="status-card">
     <mat-card-header>
       <mat-card-title>Last operation</mat-card-title>
     </mat-card-header>
@@ -148,4 +155,5 @@
       </div>
     </mat-card-content>
   </mat-card>
+  }
 </div>

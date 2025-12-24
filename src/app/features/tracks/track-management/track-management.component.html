@@ -11,13 +11,14 @@
       <div class="preset-buttons">
         <h3>Quick Presets:</h3>
         <div class="button-grid">
-          <button
-            mat-stroked-button
-            *ngFor="let preset of presetRanges"
-            (click)="applyPreset(preset)"
-          >
-            {{ preset.label }}
-          </button>
+          @for (preset of presetRanges; track preset.label) {
+            <button
+              mat-stroked-button
+              (click)="applyPreset(preset)"
+            >
+              {{ preset.label }}
+            </button>
+          }
         </div>
       </div>
 
@@ -39,9 +40,11 @@
           </mat-form-field>
         </div>
 
-        <div class="error-message" *ngIf="rangeForm.errors?.['invalidRange']">
-          <mat-error>Maximum must be greater than minimum</mat-error>
-        </div>
+        @if (rangeForm.errors?.['invalidRange']) {
+          <div class="error-message">
+            <mat-error>Maximum must be greater than minimum</mat-error>
+          </div>
+        }
 
         <div class="form-actions">
           <button mat-button type="button" (click)="rangeForm.reset()">Clear</button>
