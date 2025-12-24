@@ -1,159 +1,209 @@
 <div class="playlist-management">
-  <div class="page-title">
-    <div>
-      <h1>Playlist Management</h1>
-      <p>Execute the bulk playlist operations exposed by the Clear Songs backend.</p>
+  <div class="page-header">
+    <div class="header-content">
+      <div>
+        <h1 class="page-title">Playlist Management</h1>
+        <p class="page-subtitle">Execute bulk playlist operations to clean your Spotify playlists</p>
+      </div>
+      <button class="btn btn-reset" type="button" (click)="resetForm()">
+        <i class="bi bi-arrow-clockwise"></i>
+        <span>Reset</span>
+      </button>
     </div>
-    <button mat-stroked-button color="primary" type="button" (click)="resetForm()">
-      <mat-icon>refresh</mat-icon>
-      Reset form
-    </button>
   </div>
 
   @if (loadingService.loading()) {
     <div class="loading-banner">
-      <mat-spinner diameter="28"></mat-spinner>
-      <span>Processing playlist operation...</span>
+      <div class="spinner-border spinner-border-sm text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <span class="loading-text">Processing playlist operation...</span>
     </div>
   }
 
-  <div class="management-grid">
-    <mat-card class="form-card">
-      <mat-card-header>
-        <mat-card-title>Target playlist</mat-card-title>
-        <mat-card-subtitle>Paste the Spotify playlist ID you want to clean</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <form [formGroup]="playlistForm">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Playlist ID</mat-label>
-            <input
-              matInput
-              formControlName="playlistId"
-              placeholder="37i9dQZF1DXcBWIGoYBM5M"
-              autocomplete="off"
-            />
-            @if (playlistIdControl?.value) {
-              <button
-                mat-icon-button
-                type="button"
-                matSuffix
-                aria-label="Clear playlist id"
-                (click)="playlistForm.patchValue({ playlistId: '' })"
-              >
-                <mat-icon>close</mat-icon>
-              </button>
-            }
-            <mat-hint>Use the alphanumeric ID from the Spotify playlist URL.</mat-hint>
-            @if (playlistIdControl?.hasError('required')) {
-              <mat-error>Playlist ID is required</mat-error>
-            }
-            @if (playlistIdControl?.hasError('pattern')) {
-              <mat-error>Spotify IDs only contain letters and numbers</mat-error>
-            }
-            @if (playlistIdControl?.hasError('minlength')) {
-              <mat-error>Playlist ID looks too short</mat-error>
-            }
-          </mat-form-field>
-
-          @if (samplePlaylists.length) {
-            <div class="samples">
-              <span>Quick samples:</span>
-              <div class="sample-buttons">
-                @for (sample of samplePlaylists; track sample.id) {
+  <div class="content-grid">
+    <div class="form-section">
+      <div class="modern-card">
+        <div class="card-header-modern">
+          <div class="card-header-content">
+            <i class="bi bi-playlist me-2"></i>
+            <div>
+              <h5 class="card-title-modern">Target Playlist</h5>
+              <p class="card-subtitle">Paste the Spotify playlist ID you want to clean</p>
+            </div>
+          </div>
+        </div>
+        <div class="card-body-modern">
+          <form [formGroup]="playlistForm">
+            <div class="form-group-modern">
+              <label class="form-label-modern">Playlist ID</label>
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  class="form-control-modern"
+                  formControlName="playlistId"
+                  placeholder="37i9dQZF1DXcBWIGoYBM5M"
+                  autocomplete="off"
+                  [class.is-invalid]="playlistIdControl?.invalid && playlistIdControl?.touched"
+                />
+                @if (playlistIdControl?.value) {
                   <button
-                    mat-stroked-button
+                    class="btn-clear-input"
                     type="button"
-                    (click)="fillExample(sample.id)"
+                    aria-label="Clear playlist id"
+                    (click)="playlistForm.patchValue({ playlistId: '' })"
                   >
-                    {{ sample.label }}
+                    <i class="bi bi-x-lg"></i>
                   </button>
                 }
               </div>
+              <div class="form-help-text">Use the alphanumeric ID from the Spotify playlist URL</div>
+              @if (playlistIdControl?.hasError('required') && playlistIdControl?.touched) {
+                <div class="error-message">
+                  <i class="bi bi-exclamation-circle me-1"></i>
+                  Playlist ID is required
+                </div>
+              }
+              @if (playlistIdControl?.hasError('pattern') && playlistIdControl?.touched) {
+                <div class="error-message">
+                  <i class="bi bi-exclamation-circle me-1"></i>
+                  Spotify IDs only contain letters and numbers
+                </div>
+              }
+              @if (playlistIdControl?.hasError('minlength') && playlistIdControl?.touched) {
+                <div class="error-message">
+                  <i class="bi bi-exclamation-circle me-1"></i>
+                  Playlist ID looks too short
+                </div>
+              }
             </div>
-          }
 
-          <mat-divider></mat-divider>
+            @if (samplePlaylists.length) {
+              <div class="samples-section">
+                <label class="samples-label">Quick samples:</label>
+                <div class="samples-grid">
+                  @for (sample of samplePlaylists; track sample.id) {
+                    <button
+                      class="btn-sample"
+                      type="button"
+                      (click)="fillExample(sample.id)"
+                    >
+                      {{ sample.label }}
+                    </button>
+                  }
+                </div>
+              </div>
+            }
 
-          <div class="actions">
-            <button
-              mat-raised-button
-              color="primary"
-              type="button"
-              [disabled]="playlistForm.invalid || loadingService.loading()"
-              (click)="handleAction('playlist')"
-            >
-              <mat-icon>playlist_remove</mat-icon>
-              Clear playlist
-            </button>
-            <button
-              mat-raised-button
-              color="warn"
-              type="button"
-              [disabled]="playlistForm.invalid || loadingService.loading()"
-              (click)="handleAction('playlistAndLibrary')"
-              matTooltip="Also removes the same tracks from your saved library"
-            >
-              <mat-icon>library_music</mat-icon>
-              Clear playlist &amp; library
-            </button>
-          </div>
-        </form>
-      </mat-card-content>
-    </mat-card>
+            <div class="actions-section">
+              <button
+                class="btn-action btn-action-primary"
+                type="button"
+                [disabled]="playlistForm.invalid || loadingService.loading()"
+                (click)="handleAction('playlist')"
+              >
+                <i class="bi bi-playlist-x"></i>
+                <span>Clear Playlist</span>
+              </button>
+              <button
+                class="btn-action btn-action-danger"
+                type="button"
+                [disabled]="playlistForm.invalid || loadingService.loading()"
+                (click)="handleAction('playlistAndLibrary')"
+                [title]="'Also removes the same tracks from your saved library'"
+              >
+                <i class="bi bi-music-note-list"></i>
+                <span>Clear Playlist & Library</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
 
-    <mat-card class="info-card">
-      <mat-card-header>
-        <mat-card-title>Operation details</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="info-row">
-          <mat-icon color="primary">playlist_remove</mat-icon>
-          <div>
-            <h4>Clear playlist</h4>
-            <p>Deletes every track from the selected playlist but keeps them in your liked songs.</p>
+    <div class="info-section">
+      <div class="modern-card">
+        <div class="card-header-modern">
+          <div class="card-header-content">
+            <i class="bi bi-info-circle me-2"></i>
+            <h5 class="card-title-modern">Operation Details</h5>
           </div>
         </div>
+        <div class="card-body-modern">
+          <div class="info-item">
+            <div class="info-icon info-icon-primary">
+              <i class="bi bi-playlist-x"></i>
+            </div>
+            <div class="info-content">
+              <h6 class="info-title">Clear Playlist</h6>
+              <p class="info-description">Deletes every track from the selected playlist but keeps them in your liked songs.</p>
+            </div>
+          </div>
 
-        <mat-divider></mat-divider>
+          <div class="info-divider"></div>
 
-        <div class="info-row warning">
-          <mat-icon color="warn">warning_amber</mat-icon>
-          <div>
-            <h4>Clear playlist &amp; library</h4>
-            <p>
-              Deletes tracks from both the playlist and your saved library. The Go backend stores a backup
-              before removal so you can recover songs when needed.
-            </p>
+          <div class="info-item info-item-warning">
+            <div class="info-icon info-icon-warning">
+              <i class="bi bi-exclamation-triangle"></i>
+            </div>
+            <div class="info-content">
+              <h6 class="info-title">Clear Playlist & Library</h6>
+              <p class="info-description">
+                Deletes tracks from both the playlist and your saved library. The Go backend stores a backup
+                before removal so you can recover songs when needed.
+              </p>
+            </div>
+          </div>
+
+          <div class="tips-section">
+            <h6 class="tips-title">Important Notes</h6>
+            <ul class="tips-list">
+              <li>
+                <i class="bi bi-check-circle-fill"></i>
+                <span>You must own or control the playlist to delete its tracks</span>
+              </li>
+              <li>
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Keep this tab open until the request finishes</span>
+              </li>
+              <li>
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Large playlists may take a few seconds due to Spotify rate limits</span>
+              </li>
+            </ul>
           </div>
         </div>
-
-        <ul class="tips">
-          <li>You must own or control the playlist to delete its tracks.</li>
-          <li>Keep this tab open until the request finishes.</li>
-          <li>Large playlists may take a few seconds due to Spotify rate limits.</li>
-        </ul>
-      </mat-card-content>
-    </mat-card>
+      </div>
+    </div>
   </div>
 
   @if (lastOperation) {
-    <mat-card class="status-card">
-    <mat-card-header>
-      <mat-card-title>Last operation</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <div class="status-content">
-        <mat-icon [class.warn-icon]="lastOperation.action === 'playlistAndLibrary'">history</mat-icon>
-        <div>
-          <div class="status-text">
-            {{ lastOperation.action === 'playlist' ? 'Cleared playlist tracks' : 'Cleared playlist and library' }}
+    <div class="status-card">
+      <div class="modern-card">
+        <div class="card-header-modern">
+          <div class="card-header-content">
+            <i class="bi bi-clock-history me-2"></i>
+            <h5 class="card-title-modern">Last Operation</h5>
           </div>
-          <div class="status-subtext">Playlist ID: <code>{{ lastOperation.playlistId }}</code></div>
-          <div class="status-subtext">{{ lastOperation.timestamp | date: 'medium' }}</div>
+        </div>
+        <div class="card-body-modern">
+          <div class="status-content">
+            <div class="status-icon" [class.status-icon-warning]="lastOperation.action === 'playlistAndLibrary'">
+              <i class="bi" [class.bi-check-circle-fill]="lastOperation.action === 'playlist'" [class.bi-exclamation-triangle-fill]="lastOperation.action === 'playlistAndLibrary'"></i>
+            </div>
+            <div class="status-details">
+              <div class="status-title">
+                {{ lastOperation.action === 'playlist' ? 'Cleared playlist tracks' : 'Cleared playlist and library' }}
+              </div>
+              <div class="status-meta">
+                <span class="status-id">Playlist ID: <code>{{ lastOperation.playlistId }}</code></span>
+                <span class="status-separator">•</span>
+                <span class="status-time">{{ lastOperation.timestamp | date: 'medium' }}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </mat-card-content>
-  </mat-card>
+    </div>
   }
 </div>
