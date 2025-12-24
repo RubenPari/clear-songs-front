@@ -1,10 +1,9 @@
-import { Component, Inject, Renderer2, OnInit } from '@angular/core';
+import { Component, Inject, Renderer2, OnInit, signal } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { Observable } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
@@ -38,29 +37,28 @@ import { LoadingService } from '../../core/services/loading.service';
   ]
 })
 export class MainLayoutComponent implements OnInit {
-  isHandset$: Observable<boolean>;
-
-  isDarkTheme = false;
+  isHandset = signal(false);
+  isDarkTheme = signal(false);
 
   constructor(
-    public authService: AuthService, 
+    public authService: AuthService,
     public loadingService: LoadingService,
     private renderer: Renderer2,
     @Inject(DOCUMENT) private document: Document,
     private breakpointObserver: BreakpointObserver
   ) {
-    this.isHandset$ = this.breakpointObserver.observe(Breakpoints.Handset)
-      .pipe(
-        map(result => result.matches),
-        shareReplay()
-      );
+    this.breakpointObserver.observe(Breakpoints.Handset).pipe(
+      map(result => result.matches)
+    ).subscribe(matches => {
+      this.isHandset.set(matches);
+    });
   }
 
   ngOnInit(): void {}
 
   toggleTheme(): void {
-    this.isDarkTheme = !this.isDarkTheme;
-    if (this.isDarkTheme) {
+    this.isDarkTheme.update(value => !value);
+    if (this.isDarkTheme()) {
       this.renderer.addClass(this.document.body, 'dark-theme');
     } else {
       this.renderer.removeClass(this.document.body, 'dark-theme');
