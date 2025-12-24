@@ -1,39 +1,70 @@
 <div class="login-container">
-  <mat-card class="login-card">
-    <mat-card-content>
+  <div class="login-background">
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+    <div class="gradient-orb orb-3"></div>
+  </div>
+  
+  <div class="login-content">
+    <div class="login-card">
       <div class="logo-section">
-        <div class="app-logo">🎵</div>
+        <div class="app-logo">
+          <div class="logo-icon">🎵</div>
+          <div class="logo-glow"></div>
+        </div>
         <h1>Clear Songs</h1>
-        <p class="tagline">Manage your Spotify library efficiently</p>
+        <p class="tagline">Manage your Spotify library with precision and ease</p>
       </div>
 
-      <div class="features-list">
-        <div class="feature-item">
-          <mat-icon>check_circle</mat-icon>
-          <span>Remove tracks by artist</span>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="bi bi-music-note-list"></i>
+          </div>
+          <div class="feature-content">
+            <h6>Remove by Artist</h6>
+            <p>Delete tracks from specific artists</p>
+          </div>
         </div>
-        <div class="feature-item">
-          <mat-icon>check_circle</mat-icon>
-          <span>Bulk delete by track count</span>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="bi bi-sliders"></i>
+          </div>
+          <div class="feature-content">
+            <h6>Bulk Operations</h6>
+            <p>Delete by track count ranges</p>
+          </div>
         </div>
-        <div class="feature-item">
-          <mat-icon>check_circle</mat-icon>
-          <span>Clean up playlists</span>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="bi bi-playlist"></i>
+          </div>
+          <div class="feature-content">
+            <h6>Playlist Cleanup</h6>
+            <p>Clear playlists efficiently</p>
+          </div>
         </div>
-        <div class="feature-item">
-          <mat-icon>check_circle</mat-icon>
-          <span>Automatic backup system</span>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="bi bi-shield-check"></i>
+          </div>
+          <div class="feature-content">
+            <h6>Auto Backup</h6>
+            <p>All deletions are safely backed up</p>
+          </div>
         </div>
       </div>
 
-      <button mat-raised-button color="primary" class="spotify-login-btn" (click)="login()">
-        <mat-icon>login</mat-icon>
-        Login with Spotify
+      <button class="btn spotify-login-btn" (click)="login()">
+        <i class="bi bi-spotify me-2"></i>
+        <span>Continue with Spotify</span>
+        <i class="bi bi-arrow-right ms-2"></i>
       </button>
 
-      <p class="disclaimer">
-        We only access your library to help you manage it. All deletions are backed up for recovery.
-      </p>
-    </mat-card-content>
-  </mat-card>
+      <div class="disclaimer">
+        <i class="bi bi-info-circle me-2"></i>
+        <span>We only access your library to help you manage it. All deletions are backed up for recovery.</span>
+      </div>
+    </div>
+  </div>
 </div>
