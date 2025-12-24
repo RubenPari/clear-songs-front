@@ -1,78 +1,151 @@
 <div class="track-management-container">
-  <h1>Track Management</h1>
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Track Management</h1>
+      <p class="page-subtitle">Remove tracks based on the number of songs per artist</p>
+    </div>
+  </div>
 
-  <mat-card class="management-card">
-    <mat-card-header>
-      <mat-card-title>Delete Tracks by Range</mat-card-title>
-      <mat-card-subtitle>Remove tracks based on the number of songs per artist</mat-card-subtitle>
-    </mat-card-header>
+  <div class="content-layout">
+    <div class="main-section">
+      <div class="modern-card">
+        <div class="card-header-modern">
+          <div class="card-header-content">
+            <i class="bi bi-sliders me-2"></i>
+            <div>
+              <h5 class="card-title-modern">Delete Tracks by Range</h5>
+              <p class="card-subtitle">Remove tracks based on the number of songs per artist</p>
+            </div>
+          </div>
+        </div>
+        <div class="card-body-modern">
+          <div class="presets-section">
+            <label class="section-label">Quick Presets</label>
+            <p class="section-description">Select a preset to quickly fill the range fields</p>
+            <div class="presets-grid">
+              @for (preset of presetRanges; track preset.label) {
+                <button
+                  class="btn-preset"
+                  (click)="applyPreset(preset)"
+                >
+                  <i class="bi bi-lightning-fill"></i>
+                  <span>{{ preset.label }}</span>
+                </button>
+              }
+            </div>
+          </div>
 
-    <mat-card-content>
-      <div class="preset-buttons">
-        <h3>Quick Presets:</h3>
-        <div class="button-grid">
-          @for (preset of presetRanges; track preset.label) {
-            <button
-              mat-stroked-button
-              (click)="applyPreset(preset)"
-            >
-              {{ preset.label }}
-            </button>
-          }
+          <div class="divider"></div>
+
+          <form [formGroup]="rangeForm" class="range-form">
+            <label class="section-label">Custom Range</label>
+            <p class="section-description">Define your own range by setting minimum and/or maximum track counts</p>
+            
+            <div class="range-inputs">
+              <div class="input-group-modern">
+                <label class="input-label">Minimum Tracks</label>
+                <input 
+                  type="number" 
+                  class="form-control-modern" 
+                  formControlName="min" 
+                  min="0"
+                  placeholder="e.g. 1"
+                  [class.is-invalid]="rangeForm.get('min')?.invalid && rangeForm.get('min')?.touched"
+                />
+                <div class="input-help">Leave empty for no minimum</div>
+              </div>
+
+              <div class="range-separator">
+                <div class="separator-line"></div>
+                <span class="separator-text">to</span>
+                <div class="separator-line"></div>
+              </div>
+
+              <div class="input-group-modern">
+                <label class="input-label">Maximum Tracks</label>
+                <input 
+                  type="number" 
+                  class="form-control-modern" 
+                  formControlName="max" 
+                  min="0"
+                  placeholder="e.g. 10"
+                  [class.is-invalid]="rangeForm.get('max')?.invalid && rangeForm.get('max')?.touched"
+                />
+                <div class="input-help">Leave empty for no maximum</div>
+              </div>
+            </div>
+
+            @if (rangeForm.errors?.['invalidRange']) {
+              <div class="error-banner">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <span>Maximum must be greater than or equal to minimum</span>
+              </div>
+            }
+
+            <div class="form-actions">
+              <button class="btn-action btn-action-secondary" type="button" (click)="rangeForm.reset()">
+                <i class="bi bi-x-circle"></i>
+                <span>Clear</span>
+              </button>
+              <button
+                class="btn-action btn-action-danger"
+                [disabled]="rangeForm.invalid"
+                (click)="deleteByRange()"
+              >
+                <i class="bi bi-trash"></i>
+                <span>Delete Tracks in Range</span>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
+    </div>
 
-      <mat-divider></mat-divider>
-
-      <form [formGroup]="rangeForm" class="range-form">
-        <h3>Custom Range:</h3>
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>Minimum tracks</mat-label>
-            <input matInput type="number" formControlName="min" min="0" />
-            <mat-hint>Leave empty for no minimum</mat-hint>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Maximum tracks</mat-label>
-            <input matInput type="number" formControlName="max" min="0" />
-            <mat-hint>Leave empty for no maximum</mat-hint>
-          </mat-form-field>
-        </div>
-
-        @if (rangeForm.errors?.['invalidRange']) {
-          <div class="error-message">
-            <mat-error>Maximum must be greater than minimum</mat-error>
+    <div class="info-section">
+      <div class="modern-card info-card">
+        <div class="card-header-modern">
+          <div class="card-header-content">
+            <i class="bi bi-info-circle me-2"></i>
+            <h5 class="card-title-modern">How It Works</h5>
           </div>
-        }
-
-        <div class="form-actions">
-          <button mat-button type="button" (click)="rangeForm.reset()">Clear</button>
-          <button
-            mat-raised-button
-            color="warn"
-            [disabled]="rangeForm.invalid"
-            (click)="deleteByRange()"
-          >
-            <mat-icon>delete_sweep</mat-icon>
-            Delete Tracks in Range
-          </button>
         </div>
-      </form>
-    </mat-card-content>
-  </mat-card>
-
-  <mat-card class="info-card">
-    <mat-card-content>
-      <h3>How it works:</h3>
-      <ul>
-        <li>This tool removes tracks from artists based on how many songs you have from them</li>
-        <li>
-          For example, setting min=1 and max=1 removes all artists with only one track (singles)
-        </li>
-        <li>Setting min=20 removes all artists with 20 or more tracks</li>
-        <li>All deleted tracks are automatically backed up to the database</li>
-      </ul>
-    </mat-card-content>
-  </mat-card>
+        <div class="card-body-modern">
+          <div class="info-list">
+            <div class="info-item">
+              <div class="info-icon">
+                <i class="bi bi-1-circle-fill"></i>
+              </div>
+              <div class="info-text">
+                This tool removes tracks from artists based on how many songs you have from them
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-icon">
+                <i class="bi bi-2-circle-fill"></i>
+              </div>
+              <div class="info-text">
+                For example, setting min=1 and max=1 removes all artists with only one track (singles)
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-icon">
+                <i class="bi bi-3-circle-fill"></i>
+              </div>
+              <div class="info-text">
+                Setting min=20 removes all artists with 20 or more tracks
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-icon">
+                <i class="bi bi-shield-check"></i>
+              </div>
+              <div class="info-text">
+                All deleted tracks are automatically backed up to the database
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
