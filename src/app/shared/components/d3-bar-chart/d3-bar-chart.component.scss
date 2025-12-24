@@ -1,0 +1,19 @@
+.d3-chart-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+
+  svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .bar {
+    transition: all 0.3s ease;
+  }
+}
+
+::ng-deep .d3-chart-tooltip {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
