@@ -35,8 +35,54 @@
         </div>
         <div class="card-body-modern">
           <form [formGroup]="playlistForm">
+            @if (loadingPlaylists) {
+              <div class="playlists-loading">
+                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <span class="loading-text">Loading your playlists...</span>
+              </div>
+            }
+
+            @if (!loadingPlaylists && userPlaylists.length > 0) {
+              <div class="playlists-section">
+                <label class="section-label">Select a Playlist</label>
+                <p class="section-description">Choose a playlist from your library to clean</p>
+                <div class="playlists-grid">
+                  @for (playlist of userPlaylists; track playlist.id) {
+                    <button
+                      type="button"
+                      class="playlist-card"
+                      [class.selected]="selectedPlaylistId === playlist.id"
+                      (click)="selectPlaylist(playlist)"
+                    >
+                      <div class="playlist-image-wrapper">
+                        @if (playlist.image_url) {
+                          <img [src]="playlist.image_url" [alt]="playlist.name" class="playlist-image" (error)="playlist.image_url = undefined" />
+                        } @else {
+                          <div class="playlist-image-placeholder">
+                            <i class="bi bi-music-note-list"></i>
+                          </div>
+                        }
+                        @if (selectedPlaylistId === playlist.id) {
+                          <div class="playlist-selected-badge">
+                            <i class="bi bi-check-circle-fill"></i>
+                          </div>
+                        }
+                      </div>
+                      <div class="playlist-name">{{ playlist.name }}</div>
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <div class="divider-with-text">
+                <span>OR</span>
+              </div>
+            }
+
             <div class="form-group-modern">
-              <label class="form-label-modern">Playlist ID</label>
+              <label class="form-label-modern">Enter Playlist ID Manually</label>
               <div class="input-wrapper">
                 <input
                   type="text"
@@ -51,7 +97,7 @@
                     class="btn-clear-input"
                     type="button"
                     aria-label="Clear playlist id"
-                    (click)="playlistForm.patchValue({ playlistId: '' })"
+                    (click)="playlistForm.patchValue({ playlistId: '' }); selectedPlaylistId = null"
                   >
                     <i class="bi bi-x-lg"></i>
                   </button>
@@ -77,23 +123,6 @@
                 </div>
               }
             </div>
-
-            @if (samplePlaylists.length) {
-              <div class="samples-section">
-                <label class="samples-label">Quick samples:</label>
-                <div class="samples-grid">
-                  @for (sample of samplePlaylists; track sample.id) {
-                    <button
-                      class="btn-sample"
-                      type="button"
-                      (click)="fillExample(sample.id)"
-                    >
-                      {{ sample.label }}
-                    </button>
-                  }
-                </div>
-              </div>
-            }
 
             <div class="actions-section">
               <button

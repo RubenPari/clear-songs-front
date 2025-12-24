@@ -1,21 +1,102 @@
+/**
+ * Authentication Service
+ * 
+ * Central service for managing user authentication and session state.
+ * This service handles all authentication-related operations including:
+ * - Spotify OAuth login flow
+ * - Session validation
+ * - User logout
+ * - Authentication state management using Angular Signals
+ * 
+ * The service uses Angular Signals (Angular 16+) for reactive state management,
+ * providing better performance and simpler API compared to RxJS BehaviorSubjects.
+ * 
+ * Authentication Flow:
+ * 1. User clicks login -> redirects to backend /auth/login
+ * 2. Backend redirects to Spotify OAuth
+ * 3. User authorizes -> Spotify redirects to /auth/callback with code
+ * 4. Backend exchanges code for token -> redirects to frontend /callback
+ * 5. Frontend calls handleCallback() -> validates session
+ * 6. User is authenticated -> redirected to dashboard
+ * 
+ * State Management:
+ * - Uses signals for reactive authentication state
+ * - Automatically checks auth status on service initialization
+ * - Syncs with localStorage for persistence across page refreshes
+ * 
+ * @service
+ * @providedIn root
+ * @author Clear Songs Development Team
+ */
 import { Injectable, signal } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { catchError, map, Observable, of, tap } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { User, AuthResponse } from '../models/api-response.model';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
+  /**
+   * Backend API URL for authentication endpoints
+   * Retrieved from environment configuration
+   */
   private apiUrl = environment.apiUrl;
+  
+  /**
+   * Private signal for authentication state
+   * 
+   * This writable signal tracks whether the user is currently authenticated.
+   * It's kept private to prevent external modifications, with a readonly
+   * version exposed through the public API.
+   */
   private _isAuthenticated = signal<boolean>(false);
+  
+  /**
+   * Public readonly signal for authentication state
+   * 
+   * Components can read this signal to reactively respond to authentication
+   * state changes. The signal automatically triggers change detection
+   * when the authentication state changes.
+   * 
+   * @example
+   * @if (authService.isAuthenticated()) {
+   *   <button (click)="logout()">Logout</button>
+   * }
+   */
   public readonly isAuthenticated = this._isAuthenticated.asReadonly();
+  
+  /**
+   * Private signal for current user data
+   * 
+   * Stores the authenticated user's information including profile data,
+   * Spotify ID, and other user-related information.
+   */
   private _currentUser = signal<User | null>(null);
+  
+  /**
+   * Public readonly signal for current user
+   * 
+   * Components can read this signal to access the current user's information.
+   * Returns null if no user is authenticated.
+   * 
+   * @example
+   * {{ authService.currentUser()?.display_name }}
+   */
   public readonly currentUser = this._currentUser.asReadonly();
 
+  /**
+   * Constructor
+   * 
+   * Initializes the service and immediately checks the authentication status
+   * to determine if the user has an active session. This ensures the application
+   * knows the authentication state on startup.
+   * 
+   * @param http - HttpClient for making HTTP requests to the backend
+   * @param router - Router for navigation after authentication events
+   */
   constructor(private http: HttpClient, private router: Router) {
     this.checkAuthStatus();
   }

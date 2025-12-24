@@ -346,6 +346,34 @@
               .artist-name {
                 display: flex;
                 align-items: center;
+                gap: 12px;
+
+                .artist-image {
+                  width: 40px;
+                  height: 40px;
+                  border-radius: 50%;
+                  object-fit: cover;
+                  flex-shrink: 0;
+                  border: 2px solid rgba(99, 102, 241, 0.1);
+                  transition: all 0.2s ease;
+
+                  &:hover {
+                    border-color: rgba(99, 102, 241, 0.3);
+                    transform: scale(1.05);
+                  }
+                }
+
+                .fallback-icon {
+                  font-size: 24px;
+                  color: #94a3b8;
+                }
+
+                i {
+                  font-size: 24px;
+                  color: #94a3b8;
+                }
+                display: flex;
+                align-items: center;
                 font-weight: 500;
                 color: #1a1a1a;
 

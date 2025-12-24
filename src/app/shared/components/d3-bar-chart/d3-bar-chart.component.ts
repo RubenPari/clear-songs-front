@@ -1,16 +1,16 @@
 /**
  * D3 Bar Chart Component
- * 
+ *
  * A reusable bar chart component built with D3.js for displaying
  * artist track counts in a modern, interactive visualization.
- * 
+ *
  * Features:
  * - Responsive design that adapts to container size
  * - Smooth animations and transitions
  * - Interactive tooltips on hover
  * - Modern gradient colors
  * - Customizable data and styling
- * 
+ *
  * @component
  * @selector app-d3-bar-chart
  * @standalone true
@@ -31,7 +31,7 @@ interface ChartData {
 })
 export class D3BarChartComponent implements OnChanges, AfterViewInit, OnDestroy {
   @ViewChild('chartContainer', { static: true }) chartContainer!: ElementRef<HTMLDivElement>;
-  
+
   @Input() data: ChartData[] = [];
   @Input() height: number = 300;
   @Input() colors: string[] = [
@@ -76,13 +76,13 @@ export class D3BarChartComponent implements OnChanges, AfterViewInit, OnDestroy 
 
   private initChart(): void {
     const container = this.chartContainer.nativeElement;
-    
+
     // Ensure container has width
     if (container.clientWidth === 0) {
       setTimeout(() => this.initChart(), 100);
       return;
     }
-    
+
     this.width = container.clientWidth - this.margin.left - this.margin.right;
     this.chartHeight = this.height - this.margin.top - this.margin.bottom;
 
@@ -178,21 +178,21 @@ export class D3BarChartComponent implements OnChanges, AfterViewInit, OnDestroy 
       .selectAll('line')
       .data(this.yScale.ticks(Math.min(maxValue, 10)))
       .join(
-        enter => enter.append('line')
+        (enter: any) => enter.append('line')
           .attr('class', 'grid-line')
           .attr('x1', 0)
           .attr('x2', this.width)
-          .attr('y1', d => this.yScale(d))
-          .attr('y2', d => this.yScale(d))
+          .attr('y1', (d: number) => this.yScale(d))
+          .attr('y2', (d: number) => this.yScale(d))
           .style('stroke', 'rgba(0, 0, 0, 0.05)')
           .style('stroke-width', 1)
           .style('stroke-dasharray', '3,3'),
-        update => update
+        (update: any) => update
           .transition()
           .duration(500)
-          .attr('y1', d => this.yScale(d))
-          .attr('y2', d => this.yScale(d)),
-        exit => exit.remove()
+          .attr('y1', (d: number) => this.yScale(d))
+          .attr('y2', (d: number) => this.yScale(d)),
+        (exit: any) => exit.remove()
       );
 
     // Remove old bars
@@ -253,28 +253,28 @@ export class D3BarChartComponent implements OnChanges, AfterViewInit, OnDestroy 
       .style('stroke', 'transparent');
   }
 
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   onResize(): void {
     if (this.chartContainer && this.svg) {
       const container = this.chartContainer.nativeElement;
       this.width = container.clientWidth - this.margin.left - this.margin.right;
-      
+
       // Update SVG width
       d3.select(container).select('svg')
         .attr('width', this.width + this.margin.left + this.margin.right);
-      
+
       // Update scales
       this.xScale.range([0, this.width]);
-      
+
       // Update grid lines width
       this.svg.selectAll('.grid-line')
         .attr('x2', this.width);
-      
+
       // Update bars
       this.svg.selectAll('.bar')
         .attr('x', (d: ChartData) => this.xScale(d.label)!)
         .attr('width', this.xScale.bandwidth());
-      
+
       // Update X axis
       this.svg.select('.x-axis')
         .attr('transform', `translate(0,${this.chartHeight})`)

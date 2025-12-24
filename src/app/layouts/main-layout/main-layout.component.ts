@@ -1,17 +1,39 @@
-import { Component, Inject, Renderer2, OnInit, signal } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+/**
+ * Main Layout Component
+ * 
+ * This is the main application layout that wraps all authenticated routes.
+ * It provides the navigation structure, toolbar, and sidebar for the application.
+ * 
+ * Features:
+ * - Responsive sidebar navigation (collapses on mobile)
+ * - Application toolbar with user menu
+ * - Dark/light theme toggle
+ * - Global loading indicator overlay
+ * - User profile display and logout functionality
+ * 
+ * The component uses Angular Signals for reactive state management and
+ * BreakpointObserver for responsive behavior. The sidebar automatically
+ * adapts to screen size (overlay on mobile, persistent on desktop).
+ * 
+ * Layout Structure:
+ * - Sidebar: Navigation menu with links to main features
+ * - Toolbar: App title, theme toggle, user menu
+ * - Content Area: Router outlet for child components
+ * - Loading Overlay: Global loading indicator
+ * 
+ * @component
+ * @selector app-main-layout
+ * @standalone true
+ * @author Clear Songs Development Team
+ */
+import { Component, Inject, Renderer2, OnInit, signal, DestroyRef, inject, PLATFORM_ID } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { map } from 'rxjs/operators';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatListModule } from '@angular/material/list';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { NgbOffcanvas, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { fromEvent } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 
 import { AuthService } from '../../core/services/auth.service';
 import { LoadingService } from '../../core/services/loading.service';
@@ -26,17 +48,12 @@ import { LoadingService } from '../../core/services/loading.service';
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
-    MatToolbarModule,
-    MatSidenavModule,
-    MatListModule,
-    MatIconModule,
-    MatButtonModule,
-    MatProgressSpinnerModule,
-    MatMenuModule,
-    MatTooltipModule
+    NgbModule
   ]
 })
 export class MainLayoutComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+
   isHandset = signal(false);
   isDarkTheme = signal(false);
 
@@ -45,13 +62,23 @@ export class MainLayoutComponent implements OnInit {
     public loadingService: LoadingService,
     private renderer: Renderer2,
     @Inject(DOCUMENT) private document: Document,
-    private breakpointObserver: BreakpointObserver
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private offcanvasService: NgbOffcanvas
   ) {
-    this.breakpointObserver.observe(Breakpoints.Handset).pipe(
-      map(result => result.matches)
-    ).subscribe(matches => {
-      this.isHandset.set(matches);
-    });
+    if (isPlatformBrowser(this.platformId)) {
+      // Check if screen is mobile (Bootstrap breakpoint: < 768px)
+      const checkIsHandset = () => window.innerWidth < 768;
+      
+      fromEvent(window, 'resize')
+        .pipe(
+          startWith(null),
+          map(() => checkIsHandset()),
+          takeUntilDestroyed(this.destroyRef)
+        )
+        .subscribe(matches => {
+          this.isHandset.set(matches);
+        });
+    }
   }
 
   ngOnInit(): void {}
@@ -66,6 +93,12 @@ export class MainLayoutComponent implements OnInit {
   }
 
   logout(): void {
-    this.authService.logout().subscribe();
+    this.authService.logout()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
+  }
+
+  openSidebar(content: any): void {
+    this.offcanvasService.open(content, { position: 'start' });
   }
 }
