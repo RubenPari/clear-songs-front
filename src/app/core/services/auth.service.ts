@@ -1,19 +1,20 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { BehaviorSubject, catchError, map, Observable, of, tap } from 'rxjs';
+import { catchError, map, Observable, of, tap } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { User, AuthResponse } from '../models/api-response.model';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private apiUrl = environment.apiUrl;
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
-  public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  public currentUser$ = this.currentUserSubject.asObservable();
+  private _isAuthenticated = signal<boolean>(false);
+  public readonly isAuthenticated = this._isAuthenticated.asReadonly();
+  private _currentUser = signal<User | null>(null);
+  public readonly currentUser = this._currentUser.asReadonly();
 
   constructor(private http: HttpClient, private router: Router) {
     this.checkAuthStatus();
@@ -49,7 +50,7 @@ export class AuthService {
     return this.http.get<AuthResponse>(`${this.apiUrl}/auth/callback?code=${code}`).pipe(
       tap((response) => {
         if (response.success) {
-          this.isAuthenticatedSubject.next(true);
+          this._isAuthenticated.set(true);
           localStorage.setItem('isAuthenticated', 'true');
         }
       })
@@ -67,8 +68,8 @@ export class AuthService {
   logout(): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/logout`, {}).pipe(
       tap(() => {
-        this.isAuthenticatedSubject.next(false);
-        this.currentUserSubject.next(null);
+        this._isAuthenticated.set(false);
+        this._currentUser.set(null);
         localStorage.removeItem('isAuthenticated');
         this.router.navigate(['/login']);
       })
@@ -94,7 +95,7 @@ export class AuthService {
     return this.http.get<AuthResponse>(`${this.apiUrl}/auth/is-auth`).pipe(
       map((response) => response.success),
       tap((isAuth) => {
-        this.isAuthenticatedSubject.next(isAuth);
+        this._isAuthenticated.set(isAuth);
         if (isAuth) {
           localStorage.setItem('isAuthenticated', 'true');
         } else {
@@ -102,7 +103,7 @@ export class AuthService {
         }
       }),
       catchError(() => {
-        this.isAuthenticatedSubject.next(false);
+        this._isAuthenticated.set(false);
         localStorage.removeItem('isAuthenticated');
         return of(false);
       })
@@ -114,7 +115,7 @@ export class AuthService {
    *
    * @returns A boolean indicating whether the user is authenticated.
    */
-  get isAuthenticated(): boolean {
-    return this.isAuthenticatedSubject.value;
+  get isAuthenticatedValue(): boolean {
+    return this._isAuthenticated();
   }
 }
