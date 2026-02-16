@@ -29,10 +29,10 @@
           </div>
         </a>
         <div class="nav-divider"></div>
-        <a class="nav-link" routerLink="/settings" routerLinkActive="active" (click)="offcanvas.dismiss()">
+        <a class="nav-link" (click)="logout(); offcanvas.dismiss()" role="button">
           <div class="nav-link-content">
-            <i class="bi bi-gear"></i>
-            <span>Settings</span>
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Logout</span>
           </div>
         </a>
       </nav>
@@ -67,10 +67,10 @@
         </div>
       </a>
       <div class="nav-divider"></div>
-      <a class="nav-link" routerLink="/settings" routerLinkActive="active">
+      <a class="nav-link" (click)="logout()" role="button">
         <div class="nav-link-content">
-          <i class="bi bi-gear"></i>
-          <span>Settings</span>
+          <i class="bi bi-box-arrow-right"></i>
+          <span>Logout</span>
         </div>
       </a>
     </nav>
@@ -113,10 +113,7 @@
             <ul class="dropdown-menu dropdown-menu-end shadow-sm">
               <li><h6 class="dropdown-header">{{ authService.currentUser()?.display_name }}</h6></li>
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" routerLink="/settings">
-                <i class="bi bi-gear me-2"></i>Settings
-              </a></li>
-              <li><a class="dropdown-item text-danger" (click)="logout()">
+              <li><a class="dropdown-item text-danger" (click)="logout()" role="button">
                 <i class="bi bi-box-arrow-right me-2"></i>Logout
               </a></li>
             </ul>
