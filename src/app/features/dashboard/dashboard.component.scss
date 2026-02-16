@@ -492,6 +492,116 @@
   }
 }
 
+// Mobile Card View for Table
+.mobile-cards {
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+
+  .artist-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .artist-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+
+      .artist-image {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid rgba(99, 102, 241, 0.1);
+      }
+
+      .artist-info {
+        flex: 1;
+
+        .artist-name {
+          font-weight: 600;
+          color: #1a1a1a;
+          margin-bottom: 4px;
+        }
+
+        .artist-count {
+          display: inline-block;
+          padding: 4px 10px;
+          border-radius: 6px;
+          font-size: 12px;
+          font-weight: 600;
+
+          &.badge-success {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
+            color: #10b981;
+          }
+
+          &.badge-primary {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            color: #6366f1;
+          }
+
+          &.badge-secondary {
+            background: rgba(148, 163, 184, 0.1);
+            color: #64748b;
+          }
+        }
+      }
+
+      .delete-btn {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+
+        i {
+          font-size: 18px;
+        }
+
+        &:hover {
+          background: #ef4444;
+          color: #ffffff;
+          transform: scale(1.1);
+        }
+      }
+    }
+  }
+}
+
+// Dark theme for mobile cards
+.dark-theme {
+  .mobile-cards {
+    .artist-card {
+      background: #1e293b;
+      border-color: rgba(255, 255, 255, 0.1);
+
+      .artist-card-header {
+        .artist-info {
+          .artist-name {
+            color: #f1f5f9;
+          }
+        }
+      }
+    }
+  }
+}
+
 // Responsive
 @media (max-width: 768px) {
   .dashboard-container {
@@ -506,6 +616,15 @@
         width: 100%;
         justify-content: center;
       }
+    }
+
+    // Hide table on mobile, show cards
+    .table-wrapper {
+      display: none;
+    }
+
+    .mobile-cards {
+      display: flex;
     }
   }
 }
