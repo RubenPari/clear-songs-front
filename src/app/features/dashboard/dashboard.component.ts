@@ -40,6 +40,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { LoadingService } from '../../core/services/loading.service';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { D3BarChartComponent } from '../../shared/components/d3-bar-chart/d3-bar-chart.component';
+import { SkeletonStatComponent, SkeletonTableComponent, SkeletonChartComponent } from '../../shared/components/skeleton/skeleton-components';
 
 @Component({
   selector: 'app-dashboard',
@@ -49,7 +50,10 @@ import { D3BarChartComponent } from '../../shared/components/d3-bar-chart/d3-bar
   imports: [
     CommonModule,
     FormsModule,
-    D3BarChartComponent
+    D3BarChartComponent,
+    SkeletonStatComponent,
+    SkeletonTableComponent,
+    SkeletonChartComponent
   ]
 })
 export class DashboardComponent implements OnInit {
@@ -70,48 +74,53 @@ export class DashboardComponent implements OnInit {
    * List of artists with track counts
    */
   artists: ArtistSummary[] = [];
-  
+
   /**
    * Filtered list of artists for display
    */
   filteredArtists: ArtistSummary[] = [];
-  
+
   /**
    * Search filter value
    */
   searchFilter: string = '';
-  
+
   /**
    * Current page for pagination
    */
   currentPage: number = 1;
-  
+
   /**
    * Items per page
    */
   itemsPerPage: number = 10;
-  
+
   /**
    * Sort column
    */
   sortColumn: string = 'name';
-  
+
   /**
    * Sort direction
    */
   sortDirection: 'asc' | 'desc' = 'asc';
-  
+
   /**
    * Total number of tracks across all artists
    * Calculated from the artist summary data
    */
   totalTracks = 0;
-  
+
   /**
    * Total number of unique artists in the library
    * Calculated from the artist summary data
    */
   totalArtists = 0;
+
+  /**
+   * Loading state for skeleton screens
+   */
+  isLoading = true;
 
   /**
    * Chart data for D3.js bar chart
@@ -161,11 +170,15 @@ export class DashboardComponent implements OnInit {
    * when the component is destroyed, preventing memory leaks.
    */
   loadTrackSummary(): void {
+    this.isLoading = true;
     this.loadingService.show();
     this.trackService.getTrackSummary()
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        finalize(() => this.loadingService.hide())
+        finalize(() => {
+          this.loadingService.hide();
+          this.isLoading = false;
+        })
       )
       .subscribe({
         next: (data) => {

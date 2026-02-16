@@ -12,184 +12,238 @@
     </div>
   </div>
 
-  <div class="stats-grid">
-    <div class="stat-card stat-card-primary">
-      <div class="stat-icon">
-        <i class="bi bi-people"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-value">{{ totalArtists }}</div>
-        <div class="stat-label">Total Artists</div>
-      </div>
+  @if (isLoading) {
+    <!-- Skeleton Loading State -->
+    <div class="stats-grid">
+      <app-skeleton-stat></app-skeleton-stat>
+      <app-skeleton-stat></app-skeleton-stat>
+      <app-skeleton-stat></app-skeleton-stat>
     </div>
 
-    <div class="stat-card stat-card-success">
-      <div class="stat-icon">
-        <i class="bi bi-music-note-list"></i>
+    <div class="dashboard-content">
+      <div class="chart-section">
+        <app-skeleton-chart></app-skeleton-chart>
       </div>
-      <div class="stat-content">
-        <div class="stat-value">{{ totalTracks }}</div>
-        <div class="stat-label">Total Tracks</div>
-      </div>
-    </div>
-
-    <div class="stat-card stat-card-info">
-      <div class="stat-icon">
-        <i class="bi bi-graph-up"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-value">{{ totalArtists > 0 ? (totalTracks / totalArtists | number : '1.1-1') : '0' }}</div>
-        <div class="stat-label">Avg Tracks/Artist</div>
+      <div class="table-section">
+        <app-skeleton-table [rowCount]="5"></app-skeleton-table>
       </div>
     </div>
-  </div>
-
-  <div class="dashboard-content">
-    <div class="chart-section">
-      <div class="modern-card">
-        <div class="card-header-modern">
-          <div class="card-header-content">
-            <i class="bi bi-bar-chart-fill me-2"></i>
-            <h5 class="card-title-modern">Top 5 Artists by Track Count</h5>
-          </div>
+  } @else {
+    <!-- Content Loaded State -->
+    <div class="stats-grid">
+      <div class="stat-card stat-card-primary">
+        <div class="stat-icon">
+          <i class="bi bi-people"></i>
         </div>
-        <div class="card-body-modern">
-          <app-d3-bar-chart
-            [data]="chartData"
-            [height]="320"
-            [colors]="chartColors">
-          </app-d3-bar-chart>
+        <div class="stat-content">
+          <div class="stat-value">{{ totalArtists }}</div>
+          <div class="stat-label">Total Artists</div>
         </div>
       </div>
+
+      <div class="stat-card stat-card-success">
+        <div class="stat-icon">
+          <i class="bi bi-music-note-list"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ totalTracks }}</div>
+          <div class="stat-label">Total Tracks</div>
+        </div>
+      </div>
+
+      <div class="stat-card stat-card-info">
+        <div class="stat-icon">
+          <i class="bi bi-graph-up"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ totalArtists > 0 ? (totalTracks / totalArtists | number : '1.1-1') : '0' }}</div>
+          <div class="stat-label">Avg Tracks/Artist</div>
+        </div>
+      </div>
     </div>
 
-    <div class="table-section">
-      <div class="modern-card">
-        <div class="card-header-modern">
-          <div class="card-header-content">
-            <i class="bi bi-list-ul me-2"></i>
-            <h5 class="card-title-modern">Artists Summary</h5>
-          </div>
-        </div>
-        <div class="card-body-modern">
-          <div class="search-container">
-            <div class="search-input-wrapper">
-              <i class="bi bi-search search-icon"></i>
-              <input 
-                type="text" 
-                class="form-control search-input" 
-                placeholder="Search artists..." 
-                [(ngModel)]="searchFilter"
-                (input)="applyFilter()"
-              />
+    <div class="dashboard-content">
+      <div class="chart-section">
+        <div class="modern-card">
+          <div class="card-header-modern">
+            <div class="card-header-content">
+              <i class="bi bi-bar-chart-fill me-2"></i>
+              <h5 class="card-title-modern">Top 5 Artists by Track Count</h5>
             </div>
           </div>
+          <div class="card-body-modern">
+            <app-d3-bar-chart
+              [data]="chartData"
+              [height]="320"
+              [colors]="chartColors">
+            </app-d3-bar-chart>
+          </div>
+        </div>
+      </div>
 
-          @if (filteredArtists.length === 0) {
-            <div class="empty-state">
-              <div class="empty-state-icon-wrapper">
-                <i class="bi bi-music-note-beamed empty-state-icon"></i>
+      <div class="table-section">
+        <div class="modern-card">
+          <div class="card-header-modern">
+            <div class="card-header-content">
+              <i class="bi bi-list-ul me-2"></i>
+              <h5 class="card-title-modern">Artists Summary</h5>
+            </div>
+          </div>
+          <div class="card-body-modern">
+            <div class="search-container">
+              <div class="search-input-wrapper">
+                <i class="bi bi-search search-icon"></i>
+                <input
+                  type="text"
+                  class="form-control search-input"
+                  placeholder="Search artists..."
+                  [(ngModel)]="searchFilter"
+                  (input)="applyFilter()"
+                />
               </div>
-              <h4 class="empty-state-title">No artists found</h4>
-              <p class="empty-state-message">No artists match your search criteria. Try adjusting your filters.</p>
-            </div>
-          }
-
-          @if (filteredArtists.length > 0) {
-            <div class="table-wrapper">
-              <table class="table-modern">
-                <thead>
-                  <tr>
-                    <th (click)="sortTable('name')" class="sortable">
-                      <div class="th-content">
-                        <span>Artist Name</span>
-                        @if (sortColumn === 'name') {
-                          <i class="bi" [class.bi-arrow-up]="sortDirection === 'asc'" [class.bi-arrow-down]="sortDirection === 'desc'"></i>
-                        } @else {
-                          <i class="bi bi-arrow-down-up text-muted"></i>
-                        }
-                      </div>
-                    </th>
-                    <th (click)="sortTable('count')" class="sortable">
-                      <div class="th-content">
-                        <span>Track Count</span>
-                        @if (sortColumn === 'count') {
-                          <i class="bi" [class.bi-arrow-up]="sortDirection === 'asc'" [class.bi-arrow-down]="sortDirection === 'desc'"></i>
-                        } @else {
-                          <i class="bi bi-arrow-down-up text-muted"></i>
-                        }
-                      </div>
-                    </th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (artist of paginatedArtists; track artist.id) {
-                    <tr>
-                      <td>
-                        <div class="artist-name">
-                          @if (artist.image_url) {
-                            <img 
-                              [src]="artist.image_url" 
-                              [alt]="artist.name"
-                              class="artist-image"
-                              (error)="artist.image_url = undefined"
-                            />
-                          }
-                          @if (!artist.image_url) {
-                            <i class="bi bi-person-circle me-2"></i>
-                          }
-                          <span>{{ artist.name }}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <span class="badge-modern" [class.badge-success]="artist.count > 20" [class.badge-primary]="artist.count <= 20 && artist.count > 10" [class.badge-secondary]="artist.count <= 10">
-                          {{ artist.count }}
-                        </span>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-action-danger"
-                          (click)="deleteArtistTracks(artist)"
-                          [title]="'Delete all tracks from ' + artist.name"
-                        >
-                          <i class="bi bi-trash"></i>
-                        </button>
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
             </div>
 
-            @if (totalPages > 1) {
-              <div class="pagination-wrapper">
-                <nav aria-label="Page navigation">
-                  <ul class="pagination-modern">
-                    <li class="page-item-modern" [class.disabled]="currentPage === 1">
-                      <a class="page-link-modern" (click)="changePage(currentPage - 1)">
-                        <i class="bi bi-chevron-left"></i>
-                        <span>Previous</span>
-                      </a>
-                    </li>
-                    @for (page of [].constructor(totalPages); track $index) {
-                      <li class="page-item-modern" [class.active]="currentPage === $index + 1">
-                        <a class="page-link-modern" (click)="changePage($index + 1)">{{ $index + 1 }}</a>
-                      </li>
-                    }
-                    <li class="page-item-modern" [class.disabled]="currentPage === totalPages">
-                      <a class="page-link-modern" (click)="changePage(currentPage + 1)">
-                        <span>Next</span>
-                        <i class="bi bi-chevron-right"></i>
-                      </a>
-                    </li>
-                  </ul>
-                </nav>
+            @if (filteredArtists.length === 0) {
+              <div class="empty-state">
+                <div class="empty-state-icon-wrapper">
+                  <i class="bi bi-music-note-beamed empty-state-icon"></i>
+                </div>
+                <h4 class="empty-state-title">No artists found</h4>
+                <p class="empty-state-message">No artists match your search criteria. Try adjusting your filters.</p>
               </div>
             }
-          }
+
+            @if (filteredArtists.length > 0) {
+              <!-- Desktop Table View -->
+              <div class="table-wrapper">
+                <table class="table-modern">
+                  <thead>
+                    <tr>
+                      <th (click)="sortTable('name')" class="sortable">
+                        <div class="th-content">
+                          <span>Artist Name</span>
+                          @if (sortColumn === 'name') {
+                            <i class="bi" [class.bi-arrow-up]="sortDirection === 'asc'" [class.bi-arrow-down]="sortDirection === 'desc'"></i>
+                          } @else {
+                            <i class="bi bi-arrow-down-up text-muted"></i>
+                          }
+                        </div>
+                      </th>
+                      <th (click)="sortTable('count')" class="sortable">
+                        <div class="th-content">
+                          <span>Track Count</span>
+                          @if (sortColumn === 'count') {
+                            <i class="bi" [class.bi-arrow-up]="sortDirection === 'asc'" [class.bi-arrow-down]="sortDirection === 'desc'"></i>
+                          } @else {
+                            <i class="bi bi-arrow-down-up text-muted"></i>
+                          }
+                        </div>
+                      </th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (artist of paginatedArtists; track artist.id) {
+                      <tr>
+                        <td>
+                          <div class="artist-name">
+                            @if (artist.image_url) {
+                              <img
+                                [src]="artist.image_url"
+                                [alt]="artist.name"
+                                class="artist-image"
+                                (error)="artist.image_url = undefined"
+                              />
+                            }
+                            @if (!artist.image_url) {
+                              <i class="bi bi-person-circle me-2"></i>
+                            }
+                            <span>{{ artist.name }}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <span class="badge-modern" [class.badge-success]="artist.count > 20" [class.badge-primary]="artist.count <= 20 && artist.count > 10" [class.badge-secondary]="artist.count <= 10">
+                            {{ artist.count }}
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            class="btn btn-action-danger"
+                            (click)="deleteArtistTracks(artist)"
+                            [title]="'Delete all tracks from ' + artist.name"
+                          >
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Mobile Cards View -->
+              <div class="mobile-cards">
+                @for (artist of paginatedArtists; track artist.id) {
+                  <div class="artist-card">
+                    <div class="artist-card-header">
+                      @if (artist.image_url) {
+                        <img
+                          [src]="artist.image_url"
+                          [alt]="artist.name"
+                          class="artist-image"
+                          (error)="artist.image_url = undefined"
+                        />
+                      }
+                      @if (!artist.image_url) {
+                        <i class="bi bi-person-circle" style="font-size: 48px; color: #94a3b8;"></i>
+                      }
+                      <div class="artist-info">
+                        <div class="artist-name">{{ artist.name }}</div>
+                        <span class="artist-count" [class.badge-success]="artist.count > 20" [class.badge-primary]="artist.count <= 20 && artist.count > 10" [class.badge-secondary]="artist.count <= 10">
+                          {{ artist.count }} tracks
+                        </span>
+                      </div>
+                      <button
+                        class="delete-btn"
+                        (click)="deleteArtistTracks(artist)"
+                        [title]="'Delete all tracks from ' + artist.name"
+                      >
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              @if (totalPages > 1) {
+                <div class="pagination-wrapper">
+                  <nav aria-label="Page navigation">
+                    <ul class="pagination-modern">
+                      <li class="page-item-modern" [class.disabled]="currentPage === 1">
+                        <a class="page-link-modern" (click)="changePage(currentPage - 1)">
+                          <i class="bi bi-chevron-left"></i>
+                          <span>Previous</span>
+                        </a>
+                      </li>
+                      @for (page of [].constructor(totalPages); track $index) {
+                        <li class="page-item-modern" [class.active]="currentPage === $index + 1">
+                          <a class="page-link-modern" (click)="changePage($index + 1)">{{ $index + 1 }}</a>
+                        </li>
+                      }
+                      <li class="page-item-modern" [class.disabled]="currentPage === totalPages">
+                        <a class="page-link-modern" (click)="changePage(currentPage + 1)">
+                          <span>Next</span>
+                          <i class="bi bi-chevron-right"></i>
+                        </a>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+              }
+            }
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  }
 </div>
