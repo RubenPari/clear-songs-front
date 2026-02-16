@@ -81,14 +81,39 @@ export class MainLayoutComponent implements OnInit {
     }
   }
 
-  ngOnInit(): void {}
+  private readonly THEME_KEY = 'app-theme-preference';
 
-  toggleTheme(): void {
-    this.isDarkTheme.update(value => !value);
+  ngOnInit(): void {
+    this.loadThemePreference();
+  }
+
+  private loadThemePreference(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      const savedTheme = localStorage.getItem(this.THEME_KEY);
+      if (savedTheme) {
+        this.isDarkTheme.set(savedTheme === 'dark');
+      } else {
+        // Check system preference
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        this.isDarkTheme.set(prefersDark);
+      }
+      this.applyTheme();
+    }
+  }
+
+  private applyTheme(): void {
     if (this.isDarkTheme()) {
       this.renderer.addClass(this.document.body, 'dark-theme');
     } else {
       this.renderer.removeClass(this.document.body, 'dark-theme');
+    }
+  }
+
+  toggleTheme(): void {
+    this.isDarkTheme.update(value => !value);
+    this.applyTheme();
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem(this.THEME_KEY, this.isDarkTheme() ? 'dark' : 'light');
     }
   }
 
