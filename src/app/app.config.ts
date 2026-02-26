@@ -17,10 +17,11 @@
  * @file app.config.ts
  * @author Clear Songs Development Team
  */
-import { ApplicationConfig, provideZoneChangeDetection, importProvidersFrom } from '@angular/core';
+import { ApplicationConfig, provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { provideClientHydration, withEventReplay, withIncrementalHydration } from '@angular/platform-browser';
 import { provideToastr } from 'ngx-toastr';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
@@ -39,14 +40,15 @@ import { authInterceptor } from './core/interceptors/auth.interceptor';
 export const appConfig: ApplicationConfig = {
   providers: [
     /**
-     * Zone.js Change Detection Configuration
-     * 
-     * Enables event coalescing which batches multiple change detection cycles
-     * that occur within the same event loop, improving performance by reducing
-     * unnecessary change detection runs.
+     * Zoneless Change Detection Configuration
      */
-    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideZonelessChangeDetection(),
     
+    provideClientHydration(
+      withEventReplay(),
+      withIncrementalHydration()
+    ),
+
     /**
      * ng-bootstrap Module
      * 
@@ -70,14 +72,14 @@ export const appConfig: ApplicationConfig = {
      * automatically adds authentication credentials (cookies) to all HTTP requests
      * and handles authentication errors globally.
      */
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
     
     /**
      * Animations Support
      * 
      * Enables Angular animations for smooth transitions and interactions.
      */
-    provideAnimations(),
+    provideAnimationsAsync(),
     
     /**
      * Toastr Notifications Configuration
