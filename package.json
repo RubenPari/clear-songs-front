@@ -3,9 +3,12 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "node tools/generate-env.js && ng serve --port 4200 --open",
-    "build": "node tools/generate-env.js && ng build",
-    "build:prod": "node tools/generate-env.js && ng build --configuration production",
+    "env": "node tools/generate-env.js",
+    "prestart": "npm run env",
+    "start": "ng serve --port 4200 --open",
+    "prebuild": "npm run env",
+    "build": "ng build",
+    "build:prod": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint"

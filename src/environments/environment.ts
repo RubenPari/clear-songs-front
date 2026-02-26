@@ -1,8 +1,6 @@
 import { environmentAuto } from './environment.auto';
 
 export const environment = {
+  ...environmentAuto,
   production: false,
-  apiUrl: environmentAuto.apiUrl,
-  spotifyClientId: environmentAuto.spotifyClientId,
-  spotifyRedirectUri: environmentAuto.spotifyRedirectUri,
 };
