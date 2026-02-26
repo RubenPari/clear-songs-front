@@ -1,4 +1,5 @@
 <div class="login-container">
+  <!-- Original Mesh Background -->
   <div class="login-background">
     <div class="gradient-orb orb-1"></div>
     <div class="gradient-orb orb-2"></div>
@@ -15,55 +16,33 @@
         <h1>Clear Songs</h1>
         <p class="tagline">Manage your Spotify library with precision and ease</p>
       </div>
-
+  
       <div class="features-grid">
         <div class="feature-card">
-          <div class="feature-icon">
-            <i class="bi bi-music-note-list"></i>
-          </div>
+          <div class="feature-icon"><i class="bi bi-music-note-list"></i></div>
           <div class="feature-content">
             <h6>Remove by Artist</h6>
             <p>Delete tracks from specific artists</p>
           </div>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">
-            <i class="bi bi-sliders"></i>
-          </div>
-          <div class="feature-content">
-            <h6>Bulk Operations</h6>
-            <p>Delete by track count ranges</p>
-          </div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="bi bi-playlist"></i>
-          </div>
+          <div class="feature-icon"><i class="bi bi-playlist"></i></div>
           <div class="feature-content">
             <h6>Playlist Cleanup</h6>
             <p>Clear playlists efficiently</p>
           </div>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="bi bi-shield-check"></i>
-          </div>
-          <div class="feature-content">
-            <h6>Auto Backup</h6>
-            <p>All deletions are safely backed up</p>
-          </div>
-        </div>
       </div>
-
+  
       <button class="btn spotify-login-btn" (click)="login()">
         <i class="bi bi-spotify me-2"></i>
         <span>Continue with Spotify</span>
         <i class="bi bi-arrow-right ms-2"></i>
       </button>
-
+  
       <div class="disclaimer">
         <i class="bi bi-info-circle me-2"></i>
-        <span>We only access your library to help you manage it. All deletions are backed up for recovery.</span>
+        <span>We only access your library to help you manage it. All deletions are backed up.</span>
       </div>
     </div>
   </div>

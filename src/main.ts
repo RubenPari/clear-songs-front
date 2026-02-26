@@ -29,6 +29,14 @@ import { appConfig } from './app/app.config';
  * @param App - The root component class
  * @param appConfig - Application configuration containing providers, routes, etc.
  */
-bootstrapApplication(App, appConfig).catch((err: unknown) => {
-  console.error('Error bootstrapping application:', err);
+const debugDiv = document.createElement('div');
+debugDiv.style.cssText = 'position:fixed;top:0;left:0;background:red;color:white;z-index:99999;padding:10px;';
+debugDiv.innerText = 'JS EXECUTING';
+document.body.appendChild(debugDiv);
+
+console.log('🚀 Bootstrapping application...');
+bootstrapApplication(App, appConfig).then(() => {
+  console.log('✅ Application bootstrapped successfully');
+}).catch((err: unknown) => {
+  console.error('❌ Error bootstrapping application:', err);
 });

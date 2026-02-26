@@ -21,7 +21,6 @@ import { ApplicationConfig, provideZonelessChangeDetection, importProvidersFrom 
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideClientHydration, withEventReplay, withIncrementalHydration } from '@angular/platform-browser';
 import { provideToastr } from 'ngx-toastr';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
@@ -39,15 +38,7 @@ import { authInterceptor } from './core/interceptors/auth.interceptor';
  */
 export const appConfig: ApplicationConfig = {
   providers: [
-    /**
-     * Zoneless Change Detection Configuration
-     */
     provideZonelessChangeDetection(),
-    
-    provideClientHydration(
-      withEventReplay(),
-      withIncrementalHydration()
-    ),
 
     /**
      * ng-bootstrap Module

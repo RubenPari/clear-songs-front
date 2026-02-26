@@ -15,20 +15,20 @@
 // ============================================
 :root {
   // Primary Colors - Refined Spotify-inspired
-  --color-primary: #1DB954;
-  --color-primary-light: #1ED760;
+  --color-primary: #1db954;
+  --color-primary-light: #1ed760;
   --color-primary-dark: #169c46;
   --color-primary-glow: rgba(29, 185, 84, 0.4);
 
   // Accent Colors
-  --color-accent: #FF2D92;
-  --color-accent-light: #FF5CA1;
+  --color-accent: #ff2d92;
+  --color-accent-light: #ff5ca1;
   --color-accent-glow: rgba(255, 45, 146, 0.4);
 
   // Background System - Dark First
-  --bg-primary: #0A0A0B;
+  --bg-primary: #0a0a0b;
   --bg-secondary: #121214;
-  --bg-tertiary: #1A1A1E;
+  --bg-tertiary: #1a1a1e;
   --bg-elevated: #222228;
   --bg-card: rgba(26, 26, 30, 0.8);
   --bg-glass: rgba(18, 18, 20, 0.7);
@@ -40,10 +40,10 @@
   --surface-active: rgba(255, 255, 255, 0.15);
 
   // Text Colors
-  --text-primary: #FFFFFF;
-  --text-secondary: #B3B3B3;
-  --text-tertiary: #6A6A6A;
-  --text-muted: #4A4A4A;
+  --text-primary: #ffffff;
+  --text-secondary: #b3b3b3;
+  --text-tertiary: #6a6a6a;
+  --text-muted: #4a4a4a;
 
   // Border Colors
   --border-subtle: rgba(255, 255, 255, 0.06);
@@ -51,19 +51,20 @@
   --border-strong: rgba(255, 255, 255, 0.2);
 
   // Semantic Colors
-  --color-success: #1DB954;
-  --color-warning: #FFB800;
-  --color-danger: #FF4757;
-  --color-info: #00D4FF;
+  --color-success: #1db954;
+  --color-warning: #ffb800;
+  --color-danger: #ff4757;
+  --color-info: #00d4ff;
 
   // Gradients
-  --gradient-primary: linear-gradient(135deg, #1DB954 0%, #1ED760 50%, #00D4FF 100%);
-  --gradient-accent: linear-gradient(135deg, #FF2D92 0%, #FF5CA1 100%);
-  --gradient-dark: linear-gradient(180deg, #0A0A0B 0%, #121214 100%);
+  --gradient-primary: linear-gradient(135deg, #1db954 0%, #1ed760 50%, #00d4ff 100%);
+  --gradient-accent: linear-gradient(135deg, #ff2d92 0%, #ff5ca1 100%);
+  --gradient-dark: linear-gradient(180deg, #0a0a0b 0%, #121214 100%);
   --gradient-card: linear-gradient(135deg, rgba(29, 185, 84, 0.1) 0%, rgba(0, 212, 255, 0.05) 100%);
-  --gradient-mesh: radial-gradient(ellipse at 20% 0%, rgba(29, 185, 84, 0.15) 0%, transparent 50%),
-                   radial-gradient(ellipse at 80% 100%, rgba(255, 45, 146, 0.1) 0%, transparent 50%),
-                   radial-gradient(ellipse at 50% 50%, rgba(0, 212, 255, 0.05) 0%, transparent 70%);
+  --gradient-mesh:
+    radial-gradient(ellipse at 20% 0%, rgba(29, 185, 84, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(255, 45, 146, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(0, 212, 255, 0.05) 0%, transparent 70%);
 
   // Typography
   --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -112,7 +113,9 @@
 // ============================================
 // Global Base Styles
 // ============================================
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -168,7 +171,12 @@ body {
 // ============================================
 // Typography System
 // ============================================
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-display);
   font-weight: 700;
   line-height: 1.2;
@@ -176,12 +184,32 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-primary);
 }
 
-h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; }
-h2 { font-size: clamp(1.5rem, 4vw, 2.5rem); font-weight: 700; }
-h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); font-weight: 600; }
-h4 { font-size: 1.25rem; font-weight: 600; }
-h5 { font-size: 1rem; font-weight: 600; }
-h6 { font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+}
+h2 {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 700;
+}
+h3 {
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  font-weight: 600;
+}
+h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+h5 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+h6 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
 
 p {
   color: var(--text-secondary);
@@ -225,7 +253,7 @@ a {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
     opacity: 0;
     transition: opacity var(--transition-fast);
   }
@@ -242,7 +270,8 @@ a {
     transform: translateY(0);
   }
 
-  i, bi {
+  i,
+  bi {
     font-size: 16px;
   }
 }
@@ -250,10 +279,14 @@ a {
 .btn-primary {
   background: var(--gradient-primary);
   color: var(--bg-primary);
-  box-shadow: var(--shadow-glow), 0 4px 16px rgba(29, 185, 84, 0.25);
+  box-shadow:
+    var(--shadow-glow),
+    0 4px 16px rgba(29, 185, 84, 0.25);
 
   &:hover {
-    box-shadow: var(--shadow-glow), 0 8px 32px rgba(29, 185, 84, 0.35);
+    box-shadow:
+      var(--shadow-glow),
+      0 8px 32px rgba(29, 185, 84, 0.35);
   }
 }
 
@@ -270,7 +303,7 @@ a {
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, #FF4757 0%, #FF6B7A 100%);
+  background: linear-gradient(135deg, #ff4757 0%, #ff6b7a 100%);
   color: white;
   box-shadow: 0 4px 16px rgba(255, 71, 87, 0.3);
 
@@ -337,7 +370,8 @@ a {
 // ============================================
 // Form Controls - Refined
 // ============================================
-.form-control, .form-select {
+.form-control,
+.form-select {
   width: 100%;
   font-family: var(--font-body);
   font-size: 14px;
@@ -522,7 +556,8 @@ a {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
@@ -542,7 +577,8 @@ a {
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -551,11 +587,14 @@ a {
 }
 
 @keyframes glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 20px var(--color-primary-glow);
   }
   50% {
-    box-shadow: 0 0 40px var(--color-primary-glow), 0 0 60px rgba(29, 185, 84, 0.2);
+    box-shadow:
+      0 0 40px var(--color-primary-glow),
+      0 0 60px rgba(29, 185, 84, 0.2);
   }
 }
 
@@ -569,7 +608,8 @@ a {
 }
 
 @keyframes gradientShift {
-  0%, 100% {
+  0%,
+  100% {
     background-position: 0% 50%;
   }
   50% {
@@ -599,11 +639,26 @@ a {
 }
 
 // Staggered Animation Delays
-.stagger-1 { animation-delay: 0.1s; opacity: 0; }
-.stagger-2 { animation-delay: 0.2s; opacity: 0; }
-.stagger-3 { animation-delay: 0.3s; opacity: 0; }
-.stagger-4 { animation-delay: 0.4s; opacity: 0; }
-.stagger-5 { animation-delay: 0.5s; opacity: 0; }
+.stagger-1 {
+  animation-delay: 0.1s;
+  opacity: 0;
+}
+.stagger-2 {
+  animation-delay: 0.2s;
+  opacity: 0;
+}
+.stagger-3 {
+  animation-delay: 0.3s;
+  opacity: 0;
+}
+.stagger-4 {
+  animation-delay: 0.4s;
+  opacity: 0;
+}
+.stagger-5 {
+  animation-delay: 0.5s;
+  opacity: 0;
+}
 
 // ============================================
 // Utility Classes

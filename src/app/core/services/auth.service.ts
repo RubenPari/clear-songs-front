@@ -54,16 +54,22 @@ export class AuthService {
    */
   public isAuthenticated = computed(() => !!this.sessionResource.value()?.success);
 
-  public currentUser = signal<any>(null).asReadonly();
+  private _currentUser = signal<any>(null);
+  public currentUser = this._currentUser.asReadonly();
 
-  constructor() {
+    constructor() {
     // Sync localStorage with session status
     effect(() => {
-      const isAuth = this.isAuthenticated();
+      const session = this.sessionResource.value();
+      const isAuth = !!session?.success;
+      const status = this.sessionResource.status() as any;
+      
       if (isAuth) {
         localStorage.setItem('isAuthenticated', 'true');
-      } else if ((this.sessionResource.status() as any) === 3) { // 3 corresponds to Resolved status in Angular Resource API
+        this._currentUser.set(session?.user);
+      } else if (status === 'resolved' || status === 'error' || status === 3 || status === 4) {
         localStorage.removeItem('isAuthenticated');
+        this._currentUser.set(null);
       }
     });
   }
@@ -94,9 +100,16 @@ export class AuthService {
   }
 
   checkAuthStatus(): Observable<boolean> {
-    return toObservable(this.sessionResource.value).pipe(
-      filter((val): val is AuthResponse => val !== undefined),
-      map(val => val.success),
+    console.log('🛡️ Checking auth status...');
+    return toObservable(this.sessionResource.status).pipe(
+      tap(status => console.log('🔄 Session resource status:', status)),
+      // Wait until status is Resolved or Error
+      filter(status => (status as any) === 'resolved' || (status as any) === 'error' || (status as any) === 3 || (status as any) === 4),
+      map(() => {
+        const val = this.sessionResource.value();
+        console.log('📋 Session resource resolved:', !!val?.success);
+        return !!val?.success;
+      }),
       take(1)
     );
   }
