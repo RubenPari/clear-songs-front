@@ -24,8 +24,7 @@
  * @standalone true
  * @author Clear Songs Development Team
  */
-import { Component, DestroyRef, inject } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -39,10 +38,6 @@ import { UserPlaylist } from '../../core/models/artist.model';
 
 /**
  * Playlist Action Type
- * 
- * Defines the two types of playlist operations available:
- * - 'playlist': Clear tracks from playlist only
- * - 'playlistAndLibrary': Clear tracks from playlist AND user's library
  */
 type PlaylistAction = 'playlist' | 'playlistAndLibrary';
 
@@ -66,7 +61,11 @@ interface SamplePlaylist {
   ],
 })
 export class PlaylistsComponent {
-  private readonly destroyRef = inject(DestroyRef);
+  private playlistService = inject(PlaylistService);
+  private notificationService = inject(NotificationService);
+  public loadingService = inject(LoadingService);
+  private modalService = inject(NgbModal);
+  private fb = inject(FormBuilder);
 
   playlistForm: FormGroup<PlaylistForm>;
   readonly samplePlaylists: readonly SamplePlaylist[] = [
@@ -74,11 +73,15 @@ export class PlaylistsComponent {
     { label: 'Focus Flow', id: '37i9dQZF1DXcBWIGoYBM5M' },
     { label: 'Road Trip', id: '0OtO7pGz4WxZmf0RduCMJL' },
   ] as const;
-  lastOperation?: { playlistId: string; action: PlaylistAction; timestamp: number };
+
+  lastOperation = signal<{ playlistId: string; action: PlaylistAction; timestamp: number } | undefined>(undefined);
   
-  userPlaylists: UserPlaylist[] = [];
-  selectedPlaylistId: string | null = null;
-  loadingPlaylists = false;
+  // Resource API integration
+  private playlistsResource = this.playlistService.getUserPlaylistsResource();
+  userPlaylists = computed(() => this.playlistsResource.value() ?? []);
+  loadingPlaylists = computed(() => this.playlistsResource.isLoading());
+  
+  selectedPlaylistId = signal<string | null>(null);
 
   private actionCopy: Record<
     PlaylistAction,
@@ -102,13 +105,7 @@ export class PlaylistsComponent {
     },
   };
 
-  constructor(
-    private fb: FormBuilder,
-    private playlistService: PlaylistService,
-    private notificationService: NotificationService,
-    public loadingService: LoadingService,
-    private modalService: NgbModal
-  ) {
+  constructor() {
     this.playlistForm = this.fb.group({
       playlistId: [
         '',
@@ -119,34 +116,20 @@ export class PlaylistsComponent {
         ],
       ],
     });
-    
-    this.loadUserPlaylists();
-  }
 
-  /**
-   * Loads all user playlists from the backend
-   */
-  loadUserPlaylists(): void {
-    this.loadingPlaylists = true;
-    this.playlistService.getUserPlaylists()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (playlists) => {
-          this.userPlaylists = playlists;
-          this.loadingPlaylists = false;
-        },
-        error: (error) => {
-          this.notificationService.error('Failed to load playlists. You can still enter a playlist ID manually.');
-          this.loadingPlaylists = false;
-        }
-      });
+    // Notify error if resource fails
+    effect(() => {
+      if (this.playlistsResource.error()) {
+        this.notificationService.error('Failed to load playlists. You can still enter a playlist ID manually.');
+      }
+    });
   }
 
   /**
    * Selects a playlist from the card grid
    */
   selectPlaylist(playlist: UserPlaylist): void {
-    this.selectedPlaylistId = playlist.id;
+    this.selectedPlaylistId.set(playlist.id);
     this.playlistForm.patchValue({ playlistId: playlist.id });
   }
 
@@ -160,7 +143,7 @@ export class PlaylistsComponent {
 
   resetForm(): void {
     this.playlistForm.reset();
-    this.selectedPlaylistId = null;
+    this.selectedPlaylistId.set(null);
   }
 
   handleAction(action: PlaylistAction): void {
@@ -198,13 +181,12 @@ export class PlaylistsComponent {
 
         request$
           .pipe(
-            takeUntilDestroyed(this.destroyRef),
             finalize(() => this.loadingService.hide())
           )
           .subscribe({
             next: () => {
               this.notificationService.success(copy.success);
-              this.lastOperation = { playlistId, action, timestamp: Date.now() };
+              this.lastOperation.set({ playlistId, action, timestamp: Date.now() });
             },
             error: (error) => {
               const serverMessage = error?.error?.message;

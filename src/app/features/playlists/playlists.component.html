@@ -35,7 +35,7 @@
         </div>
         <div class="card-body-modern">
           <form [formGroup]="playlistForm">
-            @if (loadingPlaylists) {
+            @if (loadingPlaylists()) {
               <div class="playlists-loading">
                 <div class="spinner-border spinner-border-sm text-primary" role="status">
                   <span class="visually-hidden">Loading...</span>
@@ -44,16 +44,16 @@
               </div>
             }
 
-            @if (!loadingPlaylists && userPlaylists.length > 0) {
+            @if (!loadingPlaylists() && userPlaylists().length > 0) {
               <div class="playlists-section">
                 <label class="section-label">Select a Playlist</label>
                 <p class="section-description">Choose a playlist from your library to clean</p>
                 <div class="playlists-grid">
-                  @for (playlist of userPlaylists; track playlist.id) {
+                  @for (playlist of userPlaylists(); track playlist.id) {
                     <button
                       type="button"
                       class="playlist-card"
-                      [class.selected]="selectedPlaylistId === playlist.id"
+                      [class.selected]="selectedPlaylistId() === playlist.id"
                       (click)="selectPlaylist(playlist)"
                     >
                       <div class="playlist-image-wrapper">
@@ -64,7 +64,7 @@
                             <i class="bi bi-music-note-list"></i>
                           </div>
                         }
-                        @if (selectedPlaylistId === playlist.id) {
+                        @if (selectedPlaylistId() === playlist.id) {
                           <div class="playlist-selected-badge">
                             <i class="bi bi-check-circle-fill"></i>
                           </div>
@@ -97,7 +97,7 @@
                     class="btn-clear-input"
                     type="button"
                     aria-label="Clear playlist id"
-                    (click)="playlistForm.patchValue({ playlistId: '' }); selectedPlaylistId = null"
+                    (click)="playlistForm.patchValue({ playlistId: '' }); selectedPlaylistId.set(null)"
                   >
                     <i class="bi bi-x-lg"></i>
                   </button>
@@ -206,7 +206,7 @@
     </div>
   </div>
 
-  @if (lastOperation) {
+  @if (lastOperation()) {
     <div class="status-card">
       <div class="modern-card">
         <div class="card-header-modern">
@@ -217,17 +217,17 @@
         </div>
         <div class="card-body-modern">
           <div class="status-content">
-            <div class="status-icon" [class.status-icon-warning]="lastOperation.action === 'playlistAndLibrary'">
-              <i class="bi" [class.bi-check-circle-fill]="lastOperation.action === 'playlist'" [class.bi-exclamation-triangle-fill]="lastOperation.action === 'playlistAndLibrary'"></i>
+            <div class="status-icon" [class.status-icon-warning]="lastOperation()!.action === 'playlistAndLibrary'">
+              <i class="bi" [class.bi-check-circle-fill]="lastOperation()!.action === 'playlist'" [class.bi-exclamation-triangle-fill]="lastOperation()!.action === 'playlistAndLibrary'"></i>
             </div>
             <div class="status-details">
               <div class="status-title">
-                {{ lastOperation.action === 'playlist' ? 'Cleared playlist tracks' : 'Cleared playlist and library' }}
+                {{ lastOperation()!.action === 'playlist' ? 'Cleared playlist tracks' : 'Cleared playlist and library' }}
               </div>
               <div class="status-meta">
-                <span class="status-id">Playlist ID: <code>{{ lastOperation.playlistId }}</code></span>
+                <span class="status-id">Playlist ID: <code>{{ lastOperation()!.playlistId }}</code></span>
                 <span class="status-separator">•</span>
-                <span class="status-time">{{ lastOperation.timestamp | date: 'medium' }}</span>
+                <span class="status-time">{{ lastOperation()!.timestamp | date: 'medium' }}</span>
               </div>
             </div>
           </div>
