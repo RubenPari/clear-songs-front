@@ -29,8 +29,9 @@
  * @author Clear Songs Development Team
  */
 import { Injectable, inject, signal, effect, computed, ResourceStatus } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { environment } from '../../../environments/environment';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, filter, map, take } from 'rxjs';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthResponse } from '../models/api-response.model';
@@ -93,15 +94,10 @@ export class AuthService {
   }
 
   checkAuthStatus(): Observable<boolean> {
-    return new Observable<boolean>((subscriber) => {
-      const stop = effect(() => {
-        const val = this.sessionResource.value();
-        if (val !== undefined) {
-          subscriber.next(val.success);
-          subscriber.complete();
-        }
-      });
-      return () => stop.destroy();
-    });
+    return toObservable(this.sessionResource.value).pipe(
+      filter((val): val is AuthResponse => val !== undefined),
+      map(val => val.success),
+      take(1)
+    );
   }
 }

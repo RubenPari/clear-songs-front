@@ -29,10 +29,10 @@
  * @file auth.guard.ts
  * @author Clear Songs Development Team
  */
-import { inject, effect } from '@angular/core';
+import { inject } from '@angular/core';
 import { CanActivateFn, Router, UrlTree } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 /**
  * Authentication Guard Function
@@ -44,24 +44,13 @@ export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  // Return an observable that waits for the resource to resolve
-  return new Observable<boolean | UrlTree>(subscriber => {
-    // We use an effect to watch the resource value
-    const stop = effect(() => {
-      const session = authService.sessionResource.value();
-      
-      // Resource is still loading
-      if (session === undefined) return;
-      
-      if (session.success) {
-        subscriber.next(true);
+  return authService.checkAuthStatus().pipe(
+    map(isAuthenticated => {
+      if (isAuthenticated) {
+        return true;
       } else {
-        subscriber.next(router.createUrlTree(['/login']));
+        return router.createUrlTree(['/login']);
       }
-      subscriber.complete();
-    });
-    
-    // Cleanup the effect when the observable is unsubscribed
-    return () => stop.destroy();
-  });
+    })
+  );
 };
