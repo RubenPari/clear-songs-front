@@ -29,58 +29,39 @@
  * @file auth.guard.ts
  * @author Clear Songs Development Team
  */
-import { inject } from '@angular/core';
+import { inject, effect } from '@angular/core';
 import { CanActivateFn, Router, UrlTree } from '@angular/router';
-import { map } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
+import { Observable } from 'rxjs';
 
 /**
  * Authentication Guard Function
  * 
  * Functional route guard that protects routes requiring authentication.
- * Returns an Observable that emits:
- * - true: User is authenticated, allow navigation
- * - UrlTree: User is not authenticated, redirect to login
- * 
- * The guard is executed before route activation, ensuring unauthorized
- * users cannot access protected pages.
- * 
- * @returns Observable<boolean | UrlTree>
- * 
- * @example
- * // In app.routes.ts:
- * {
- *   path: 'protected',
- *   component: ProtectedComponent,
- *   canActivate: [authGuard]
- * }
+ * Uses the Resource-based AuthService to check session status.
  */
 export const authGuard: CanActivateFn = () => {
-  // Inject dependencies using Angular's inject() function
-  // This is the modern way to get services in functional guards
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  /**
-   * Check Authentication Status
-   * 
-   * Calls the AuthService to verify if the user has a valid session.
-   * The checkAuthStatus() method makes an HTTP request to the backend
-   * to validate the current session.
-   * 
-   * The result is mapped to either:
-   * - true: User is authenticated, allow route activation
-   * - UrlTree: User is not authenticated, redirect to login page
-   */
-  return authService.checkAuthStatus().pipe(
-    map((isAuthenticated: boolean) => {
-      if (isAuthenticated) {
-        // User is authenticated, allow navigation to the protected route
-        return true;
+  // Return an observable that waits for the resource to resolve
+  return new Observable<boolean | UrlTree>(subscriber => {
+    // We use an effect to watch the resource value
+    const stop = effect(() => {
+      const session = authService.sessionResource.value();
+      
+      // Resource is still loading
+      if (session === undefined) return;
+      
+      if (session.success) {
+        subscriber.next(true);
+      } else {
+        subscriber.next(router.createUrlTree(['/login']));
       }
-      // User is not authenticated, redirect to login page
-      // createUrlTree() creates a navigation target that the router can use
-      return router.createUrlTree(['/login']);
-    })
-  );
+      subscriber.complete();
+    });
+    
+    // Cleanup the effect when the observable is unsubscribed
+    return () => stop.destroy();
+  });
 };
