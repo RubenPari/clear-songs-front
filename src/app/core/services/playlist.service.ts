@@ -36,7 +36,7 @@ export class PlaylistService {
    * Gets all playlists owned or followed by the user using the modern httpResource API.
    */
   getUserPlaylistsResource() {
-    return httpResource<UserPlaylist[]>(`${this.apiUrl}/list`);
+    return httpResource<UserPlaylist[]>(() => `${this.apiUrl}/list`);
   }
 
   deleteAllPlaylistTracks(playlistId: string): Observable<ApiResponse> {

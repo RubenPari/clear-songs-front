@@ -1,16 +1,16 @@
 /**
  * Authentication Service
- * 
+ *
  * Central service for managing user authentication and session state.
  * This service handles all authentication-related operations including:
  * - Spotify OAuth login flow
  * - Session validation
  * - User logout
  * - Authentication state management using Angular Signals
- * 
+ *
  * The service uses Angular Signals (Angular 16+) for reactive state management,
  * providing better performance and simpler API compared to RxJS BehaviorSubjects.
- * 
+ *
  * Authentication Flow:
  * 1. User clicks login -> redirects to backend /auth/login
  * 2. Backend redirects to Spotify OAuth
@@ -18,12 +18,12 @@
  * 4. Backend exchanges code for token -> redirects to frontend /callback
  * 5. Frontend calls handleCallback() -> validates session
  * 6. User is authenticated -> redirected to dashboard
- * 
+ *
  * State Management:
  * - Uses signals for reactive authentication state
  * - Automatically checks auth status on service initialization
  * - Syncs with localStorage for persistence across page refreshes
- * 
+ *
  * @service
  * @providedIn root
  * @author Clear Songs Development Team
@@ -42,17 +42,17 @@ export class AuthService {
   private apiUrl = environment.apiUrl;
   private http = inject(HttpClient);
   private router = inject(Router);
-  
+
   /**
    * Session Resource using httpResource.
    */
-  public sessionResource = httpResource<AuthResponse>(`${this.apiUrl}/auth/is-auth`);
+  public sessionResource = httpResource<AuthResponse>(() => `${this.apiUrl}/auth/is-auth`);
 
   /**
    * Auth state derived from the resource
    */
   public isAuthenticated = computed(() => !!this.sessionResource.value()?.success);
-  
+
   public currentUser = signal<any>(null).asReadonly();
 
   constructor() {
@@ -61,7 +61,7 @@ export class AuthService {
       const isAuth = this.isAuthenticated();
       if (isAuth) {
         localStorage.setItem('isAuthenticated', 'true');
-      } else if (this.sessionResource.status() === ResourceStatus.Resolved) {
+      } else if ((this.sessionResource.status() as any) === 3) { // 3 corresponds to Resolved status in Angular Resource API
         localStorage.removeItem('isAuthenticated');
       }
     });
@@ -78,7 +78,7 @@ export class AuthService {
           localStorage.setItem('isAuthenticated', 'true');
           this.sessionResource.reload();
         }
-      })
+      }),
     );
   }
 
@@ -88,12 +88,12 @@ export class AuthService {
         localStorage.removeItem('isAuthenticated');
         this.sessionResource.reload();
         this.router.navigate(['/login']);
-      })
+      }),
     );
   }
 
   checkAuthStatus(): Observable<boolean> {
-    return new Observable<boolean>(subscriber => {
+    return new Observable<boolean>((subscriber) => {
       const stop = effect(() => {
         const val = this.sessionResource.value();
         if (val !== undefined) {
