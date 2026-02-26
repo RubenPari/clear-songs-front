@@ -26,14 +26,11 @@
  * @standalone true
  * @author Clear Songs Development Team
  */
-import { Component, Inject, Renderer2, OnInit, signal, DestroyRef, inject, PLATFORM_ID } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, Inject, Renderer2, signal, inject, PLATFORM_ID, effect, untracked } from '@angular/core';
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { NgbOffcanvas, NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { fromEvent } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
 
 import { AuthService } from '../../core/services/auth.service';
 import { LoadingService } from '../../core/services/loading.service';
@@ -51,76 +48,59 @@ import { LoadingService } from '../../core/services/loading.service';
     NgbModule
   ]
 })
-export class MainLayoutComponent implements OnInit {
-  private readonly destroyRef = inject(DestroyRef);
+export class MainLayoutComponent {
+  private readonly THEME_KEY = 'app-theme-preference';
+  private renderer = inject(Renderer2);
+  private document = inject(DOCUMENT);
+  private platformId = inject(PLATFORM_ID);
+  private offcanvasService = inject(NgbOffcanvas);
+  public authService = inject(AuthService);
+  public loadingService = inject(LoadingService);
 
   isHandset = signal(false);
   isDarkTheme = signal(false);
 
-  constructor(
-    public authService: AuthService,
-    public loadingService: LoadingService,
-    private renderer: Renderer2,
-    @Inject(DOCUMENT) private document: Document,
-    @Inject(PLATFORM_ID) private platformId: Object,
-    private offcanvasService: NgbOffcanvas
-  ) {
+  constructor() {
     if (isPlatformBrowser(this.platformId)) {
-      // Check if screen is mobile (Bootstrap breakpoint: < 768px)
-      const checkIsHandset = () => window.innerWidth < 768;
-      
-      fromEvent(window, 'resize')
-        .pipe(
-          startWith(null),
-          map(() => checkIsHandset()),
-          takeUntilDestroyed(this.destroyRef)
-        )
-        .subscribe(matches => {
-          this.isHandset.set(matches);
-        });
-    }
-  }
+      // Setup handset detection using a simple event listener and signal
+      this.isHandset.set(window.innerWidth < 768);
+      window.addEventListener('resize', () => {
+        this.isHandset.set(window.innerWidth < 768);
+      });
 
-  private readonly THEME_KEY = 'app-theme-preference';
-
-  ngOnInit(): void {
-    this.loadThemePreference();
-  }
-
-  private loadThemePreference(): void {
-    if (isPlatformBrowser(this.platformId)) {
+      // Load theme preference
       const savedTheme = localStorage.getItem(this.THEME_KEY);
       if (savedTheme) {
         this.isDarkTheme.set(savedTheme === 'dark');
       } else {
-        // Check system preference
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         this.isDarkTheme.set(prefersDark);
       }
-      this.applyTheme();
     }
-  }
 
-  private applyTheme(): void {
-    if (this.isDarkTheme()) {
-      this.renderer.addClass(this.document.body, 'dark-theme');
-    } else {
-      this.renderer.removeClass(this.document.body, 'dark-theme');
-    }
+    // Effect for applying theme automatically when isDarkTheme signal changes
+    effect(() => {
+      const isDark = this.isDarkTheme();
+      if (isDark) {
+        this.renderer.addClass(this.document.body, 'dark-theme');
+      } else {
+        this.renderer.removeClass(this.document.body, 'dark-theme');
+      }
+      
+      if (isPlatformBrowser(this.platformId)) {
+        untracked(() => {
+          localStorage.setItem(this.THEME_KEY, isDark ? 'dark' : 'light');
+        });
+      }
+    });
   }
 
   toggleTheme(): void {
     this.isDarkTheme.update(value => !value);
-    this.applyTheme();
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem(this.THEME_KEY, this.isDarkTheme() ? 'dark' : 'light');
-    }
   }
 
   logout(): void {
-    this.authService.logout()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe();
+    this.authService.logout().subscribe();
   }
 
   openSidebar(content: any): void {

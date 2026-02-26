@@ -74,29 +74,19 @@ interface PresetRange {
   ]
 })
 export class TrackManagementComponent {
-  /**
-   * DestroyRef for managing subscription cleanup
-   * Used with takeUntilDestroyed() to automatically unsubscribe when component is destroyed
-   */
-  private readonly destroyRef = inject(DestroyRef);
-  
+  private fb = inject(FormBuilder);
+  private trackService = inject(TrackService);
+  private notificationService = inject(NotificationService);
+  public loadingService = inject(LoadingService);
+  private modalService = inject(NgbModal);
+
   /**
    * Reactive form for range input
-   * Contains min and max fields with validation
    */
   rangeForm: FormGroup<{ min: any; max: any }>;
   
   /**
    * Preset range configurations for quick selection
-   * 
-   * These presets provide common deletion scenarios:
-   * - Singles: Artists with exactly 1 track
-   * - EPs: Artists with 2-5 tracks
-   * - Small Collections: Artists with 6-10 tracks
-   * - Albums: Artists with 11-20 tracks
-   * - Large Collections: Artists with 20+ tracks
-   * 
-   * Users can click these buttons to quickly fill the form.
    */
   readonly presetRanges: readonly PresetRange[] = [
     { label: 'Singles (1 track)', min: 1, max: 1 },
@@ -106,13 +96,7 @@ export class TrackManagementComponent {
     { label: 'Large Collections (20+ tracks)', min: 20, max: null },
   ] as const;
 
-  constructor(
-    private fb: FormBuilder,
-    private trackService: TrackService,
-    private notificationService: NotificationService,
-    public loadingService: LoadingService,
-    private modalService: NgbModal
-  ) {
+  constructor() {
     this.rangeForm = this.fb.group(
       {
         min: [null, [Validators.min(0)]],
@@ -122,23 +106,10 @@ export class TrackManagementComponent {
     );
   }
 
-  /**
-   * Range Validator (Static)
-   * 
-   * Custom validator that ensures the max value is greater than or equal to
-   * the min value when both are provided. This prevents invalid range queries.
-   * 
-   * The validator is static so it can be used without a component instance,
-   * which is a best practice for validators in Angular.
-   * 
-   * @param form - The form control to validate (FormGroup with min/max fields)
-   * @returns ValidationErrors object if validation fails, null if valid
-   */
   static rangeValidator(form: AbstractControl): ValidationErrors | null {
     const min = form.get('min')?.value;
     const max = form.get('max')?.value;
 
-    // If both min and max are provided, max must be >= min
     if (min !== null && max !== null && min > max) {
       return { invalidRange: true };
     }
@@ -179,7 +150,6 @@ export class TrackManagementComponent {
           this.loadingService.show();
           this.trackService.deleteTracksByRange(min, max)
             .pipe(
-              takeUntilDestroyed(this.destroyRef),
               finalize(() => this.loadingService.hide())
             )
             .subscribe({
