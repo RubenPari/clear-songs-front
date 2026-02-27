@@ -94,7 +94,16 @@ export class DashboardComponent {
   isLoading = computed(() => this.trackSummaryResource.isLoading());
   
   // Create a computed signal for artists from the resource
-  artists = computed(() => this.trackSummaryResource.value() ?? []);
+  artists = computed<ArtistSummary[]>(() => {
+    const res = this.trackSummaryResource.value() as any;
+    if (!res) return [];
+    if (res.data && Array.isArray(res.data)) {
+      return res.data as ArtistSummary[];
+    } else if (Array.isArray(res)) {
+      return res as ArtistSummary[];
+    }
+    return [];
+  });
 
   totalTracks = computed(() => this.artists().reduce((sum, artist) => sum + artist.count, 0));
   totalArtists = computed(() => this.artists().length);

@@ -28,7 +28,7 @@
  * @providedIn root
  * @author Clear Songs Development Team
  */
-import { Injectable, inject, signal, effect, computed, ResourceStatus } from '@angular/core';
+import { Injectable, inject, Injector, signal, effect, computed, ResourceStatus } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { environment } from '../../../environments/environment';
 import { Observable, tap, filter, map, take } from 'rxjs';
@@ -43,6 +43,7 @@ export class AuthService {
   private apiUrl = environment.apiUrl;
   private http = inject(HttpClient);
   private router = inject(Router);
+  private injector = inject(Injector);
 
   /**
    * Session Resource using httpResource.
@@ -101,7 +102,7 @@ export class AuthService {
 
   checkAuthStatus(): Observable<boolean> {
     console.log('🛡️ Checking auth status...');
-    return toObservable(this.sessionResource.status).pipe(
+    return toObservable(this.sessionResource.status, { injector: this.injector }).pipe(
       tap(status => console.log('🔄 Session resource status:', status)),
       // Wait until status is Resolved or Error
       filter(status => (status as any) === 'resolved' || (status as any) === 'error' || (status as any) === 3 || (status as any) === 4),

@@ -78,7 +78,16 @@ export class PlaylistsComponent {
   
   // Resource API integration
   private playlistsResource = this.playlistService.getUserPlaylistsResource();
-  userPlaylists = computed(() => this.playlistsResource.value() ?? []);
+  userPlaylists = computed<UserPlaylist[]>(() => {
+    const res = this.playlistsResource.value() as any;
+    if (!res) return [];
+    if (res.data && Array.isArray(res.data)) {
+      return res.data;
+    } else if (Array.isArray(res)) {
+      return res;
+    }
+    return [];
+  });
   loadingPlaylists = computed(() => this.playlistsResource.isLoading());
   
   selectedPlaylistId = signal<string | null>(null);
