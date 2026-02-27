@@ -461,9 +461,14 @@
     transition: all var(--transition-fast);
     border-bottom: 1px solid var(--border-subtle);
 
-    &:hover {
-      background: var(--surface-subtle);
+    &.clickable-row {
+      cursor: pointer;
+
+      &:hover {
+        background: var(--surface-subtle);
+      }
     }
+
 
     &:last-child {
       border-bottom: none;
@@ -581,11 +586,13 @@
     padding: var(--space-md);
     border: 1px solid var(--border-subtle);
     transition: all var(--transition-base);
+    cursor: pointer;
 
     &:hover {
       border-color: var(--border-default);
       box-shadow: var(--shadow-md);
     }
+
 
     .artist-card-header {
       display: flex;

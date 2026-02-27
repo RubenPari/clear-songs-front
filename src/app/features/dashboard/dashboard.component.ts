@@ -40,6 +40,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/c
 import { D3BarChartComponent } from '../../shared/components/d3-bar-chart/d3-bar-chart.component';
 import { SkeletonStatComponent, SkeletonTableComponent, SkeletonChartComponent } from '../../shared/components/skeleton/skeleton-components';
 import { TrackStore } from '../../core/stores/track.store';
+import { ArtistTracksModalComponent } from '../tracks/artist-tracks-modal.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -56,6 +57,7 @@ import { TrackStore } from '../../core/stores/track.store';
   ]
 })
 export class DashboardComponent {
+
   private trackService = inject(TrackService);
   private notificationService = inject(NotificationService);
   public loadingService = inject(LoadingService);
@@ -212,6 +214,21 @@ export class DashboardComponent {
 
   changePage(page: number): void {
     this.currentPage.set(page);
+  }
+
+  openArtistTracks(artist: ArtistSummary): void {
+    const modalRef = this.modalService.open(ArtistTracksModalComponent, {
+      size: 'lg',
+      centered: true,
+      scrollable: true
+    });
+    modalRef.componentInstance.artist = artist;
+
+    modalRef.result.then((tracksChanged) => {
+      if (tracksChanged) {
+        this.loadTrackSummary();
+      }
+    }, () => {});
   }
 
   deleteArtistTracks(artist: ArtistSummary): void {

@@ -144,7 +144,7 @@
                   </thead>
                   <tbody>
                     @for (artist of paginatedArtists(); track artist.id) {
-                      <tr>
+                      <tr (click)="openArtistTracks(artist)" class="clickable-row">
                         <td>
                           <div class="artist-name">
                             @if (artist.image_url) {
@@ -166,7 +166,7 @@
                             {{ artist.count }}
                           </span>
                         </td>
-                        <td>
+                        <td (click)="$event.stopPropagation()">
                           <button
                             class="btn btn-action-danger"
                             (click)="deleteArtistTracks(artist)"
@@ -184,7 +184,7 @@
               <!-- Mobile Cards View -->
               <div class="mobile-cards">
                 @for (artist of paginatedArtists(); track artist.id) {
-                  <div class="artist-card">
+                  <div class="artist-card" (click)="openArtistTracks(artist)">
                     <div class="artist-card-header">
                       @if (artist.image_url) {
                         <img
@@ -205,7 +205,7 @@
                       </div>
                       <button
                         class="delete-btn"
-                        (click)="deleteArtistTracks(artist)"
+                        (click)="deleteArtistTracks(artist); $event.stopPropagation()"
                         [title]="'Delete all tracks from ' + artist.name"
                       >
                         <i class="bi bi-trash"></i>

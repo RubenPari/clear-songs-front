@@ -63,7 +63,7 @@ export interface Playlist {
  * @interface Track
  */
 export interface Track {
-  /** Unique identifier for the track (database ID) */
+  /** Unique identifier for the track (Spotify ID or database ID) */
   id: string;
   
   /** Name of the track */
@@ -78,20 +78,26 @@ export interface Track {
   /** Duration of the track in milliseconds */
   duration: number;
   
-  /** Popularity score from Spotify (0-100) */
-  popularity: number;
+  /** Popularity score from Spotify (0-100) (optional) */
+  popularity?: number;
   
-  /** Whether the track contains explicit content */
-  explicit: boolean;
+  /** Whether the track contains explicit content (optional) */
+  explicit?: boolean;
   
-  /** Spotify track ID (for API calls and links) */
-  spotify_id: string;
+  /** Spotify track ID (optional) */
+  spotify_id?: string;
   
-  /** ISO 8601 timestamp when the track was added to the database */
-  created_at: string;
+  /** Spotify URL (optional) */
+  spotify_url?: string;
   
-  /** ISO 8601 timestamp when the track was last updated */
-  updated_at: string;
+  /** Image URL (optional) */
+  image_url?: string;
+  
+  /** ISO 8601 timestamp when the track was added to the database (optional) */
+  created_at?: string;
+  
+  /** ISO 8601 timestamp when the track was last updated (optional) */
+  updated_at?: string;
 }
 
 /**

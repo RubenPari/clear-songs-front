@@ -63,4 +63,8 @@ export class TrackService {
   getTracksByArtist(artistId: string): Observable<Track[]> {
     return this.http.get<Track[]>(`${this.apiUrl}/by-artist/${artistId}`);
   }
+
+  deleteTrack(trackId: string): Observable<ApiResponse> {
+    return this.http.delete<ApiResponse>(`${this.apiUrl}/${trackId}`);
+  }
 }
