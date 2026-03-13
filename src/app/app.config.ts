@@ -19,6 +19,7 @@ import { authInterceptor } from './core/interceptors/auth.interceptor';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
     importProvidersFrom(NgbModule),
     importProvidersFrom(
       TranslateModule.forRoot({
@@ -29,9 +30,8 @@ export const appConfig: ApplicationConfig = {
         }
       })
     ),
-    provideTranslateHttpLoader({ prefix: './assets/i18n/' }),
+    provideTranslateHttpLoader({ prefix: './assets/i18n/', suffix: '.json' }),
     provideRouter(routes),
-    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
     provideAnimationsAsync(),
     provideToastr({
       timeOut: 3000,

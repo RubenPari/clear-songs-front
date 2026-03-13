@@ -13,8 +13,10 @@
  * @selector app-root
  * @standalone true
  */
-import { Component } from '@angular/core';
+import { Component, inject, PLATFORM_ID } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { isPlatformBrowser } from '@angular/common';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-root',
@@ -29,4 +31,26 @@ export class App {
    * Used for identification and potentially in the browser title bar
    */
   title = 'clear-songs-front';
+  
+  private translate = inject(TranslateService);
+  private platformId = inject(PLATFORM_ID);
+
+  constructor() {
+    this.translate.addLangs(['en', 'it']);
+    this.translate.setDefaultLang('en');
+    
+    // Check if preference exists, otherwise use browser language or default
+    if (isPlatformBrowser(this.platformId)) {
+      const browserLang = this.translate.getBrowserLang() || 'en';
+      const savedLang = localStorage.getItem('app-lang-preference');
+      
+      const langToUse = savedLang && ['en', 'it'].includes(savedLang) 
+        ? savedLang 
+        : (['en', 'it'].includes(browserLang) ? browserLang : 'en');
+        
+      this.translate.use(langToUse);
+    } else {
+      this.translate.use('en');
+    }
+  }
 }
