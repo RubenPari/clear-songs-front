@@ -26,11 +26,12 @@
  * @standalone true
  * @author Clear Songs Development Team
  */
-import { Component, computed, inject, signal, effect } from '@angular/core';
+import { Component, OnInit, computed, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { finalize } from 'rxjs/operators';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { ArtistSummary } from '../../core/models/artist.model';
 import { TrackService } from '../../core/services/track.service';
@@ -53,16 +54,19 @@ import { ArtistTracksModalComponent } from '../tracks/artist-tracks-modal.compon
     D3BarChartComponent,
     SkeletonStatComponent,
     SkeletonTableComponent,
-    SkeletonChartComponent
+    SkeletonChartComponent,
+    NgbModule,
+    TranslateModule
   ]
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
 
   private trackService = inject(TrackService);
   private notificationService = inject(NotificationService);
   public loadingService = inject(LoadingService);
   private modalService = inject(NgbModal);
   private trackStore = inject(TrackStore);
+  private translate = inject(TranslateService);
 
   // Resource holding the data
   private trackSummaryResource = this.trackService.getTrackSummaryResource();
@@ -186,9 +190,13 @@ export class DashboardComponent {
 
     effect(() => {
       if (this.trackSummaryResource.error()) {
-        this.notificationService.error('Failed to load track summary');
+        this.notificationService.error(this.translate.instant('DASHBOARD.LOAD_ERROR'));
       }
     });
+  }
+
+  ngOnInit(): void {
+    // No specific initialization needed here for now, but required by OnInit
   }
 
   loadTrackSummary(): void {
@@ -236,10 +244,10 @@ export class DashboardComponent {
       size: 'md',
       centered: true
     });
-    modalRef.componentInstance.title = 'Delete Artist Tracks';
-    modalRef.componentInstance.message = `Are you sure you want to delete all ${artist.count} tracks from ${artist.name}?`;
-    modalRef.componentInstance.confirmText = 'Delete';
-    modalRef.componentInstance.cancelText = 'Cancel';
+    modalRef.componentInstance.title = this.translate.instant('DASHBOARD.DELETE_ARTIST_TITLE');
+    modalRef.componentInstance.message = this.translate.instant('DASHBOARD.DELETE_ARTIST_MSG', { count: artist.count, name: artist.name });
+    modalRef.componentInstance.confirmText = this.translate.instant('COMMON.DELETE');
+    modalRef.componentInstance.cancelText = this.translate.instant('COMMON.CANCEL');
 
     modalRef.result.then(
       (result) => {
@@ -251,11 +259,11 @@ export class DashboardComponent {
             )
             .subscribe({
               next: () => {
-                this.notificationService.success(`Successfully deleted tracks from ${artist.name}`);
+                this.notificationService.success(this.translate.instant('DASHBOARD.DELETE_ARTIST_SUCCESS', { name: artist.name }));
                 this.loadTrackSummary();
               },
               error: () => {
-                this.notificationService.error('Failed to delete tracks');
+                this.notificationService.error(this.translate.instant('DASHBOARD.DELETE_ARTIST_ERROR'));
               },
             });
         }

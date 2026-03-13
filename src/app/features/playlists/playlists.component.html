@@ -2,12 +2,12 @@
   <div class="page-header">
     <div class="header-content">
       <div>
-        <h1 class="page-title">Playlist Management</h1>
-        <p class="page-subtitle">Execute bulk playlist operations to clean your Spotify playlists</p>
+        <h1 class="page-title">{{ 'PLAYLISTS.TITLE' | translate }}</h1>
+        <p class="page-subtitle">{{ 'PLAYLISTS.SUBTITLE' | translate }}</p>
       </div>
       <button class="btn btn-reset" type="button" (click)="resetForm()">
         <i class="bi bi-arrow-clockwise"></i>
-        <span>Reset</span>
+        <span>{{ 'PLAYLISTS.RESET' | translate }}</span>
       </button>
     </div>
   </div>
@@ -15,9 +15,9 @@
   @if (loadingService.loading()) {
     <div class="loading-banner">
       <div class="spinner-border spinner-border-sm text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
+        <span class="visually-hidden">{{ 'COMMON.LOADING' | translate }}</span>
       </div>
-      <span class="loading-text">Processing playlist operation...</span>
+      <span class="loading-text">{{ 'PLAYLISTS.PROCESSING' | translate }}</span>
     </div>
   }
 
@@ -28,8 +28,8 @@
           <div class="card-header-content">
             <i class="bi bi-playlist me-2"></i>
             <div>
-              <h5 class="card-title-modern">Target Playlist</h5>
-              <p class="card-subtitle">Paste the Spotify playlist ID you want to clean</p>
+              <h5 class="card-title-modern">{{ 'PLAYLISTS.TARGET_TITLE' | translate }}</h5>
+              <p class="card-subtitle">{{ 'PLAYLISTS.TARGET_DESC' | translate }}</p>
             </div>
           </div>
         </div>
@@ -38,16 +38,16 @@
             @if (loadingPlaylists()) {
               <div class="playlists-loading">
                 <div class="spinner-border spinner-border-sm text-primary" role="status">
-                  <span class="visually-hidden">Loading...</span>
+                  <span class="visually-hidden">{{ 'COMMON.LOADING' | translate }}</span>
                 </div>
-                <span class="loading-text">Loading your playlists...</span>
+                <span class="loading-text">{{ 'PLAYLISTS.LOADING_PLAYLISTS' | translate }}</span>
               </div>
             }
 
             @if (!loadingPlaylists() && userPlaylists().length > 0) {
               <div class="playlists-section">
-                <label class="section-label">Select a Playlist</label>
-                <p class="section-description">Choose a playlist from your library to clean</p>
+                <label class="section-label">{{ 'PLAYLISTS.SELECT_PLAYLIST' | translate }}</label>
+                <p class="section-description">{{ 'PLAYLISTS.SELECT_DESC' | translate }}</p>
                 <div class="playlists-grid">
                   @for (playlist of userPlaylists(); track playlist.id) {
                     <button
@@ -77,12 +77,12 @@
               </div>
 
               <div class="divider-with-text">
-                <span>OR</span>
+                <span>{{ 'PLAYLISTS.OR' | translate }}</span>
               </div>
             }
 
             <div class="form-group-modern">
-              <label class="form-label-modern">Enter Playlist ID Manually</label>
+              <label class="form-label-modern">{{ 'PLAYLISTS.MANUAL_LABEL' | translate }}</label>
               <div class="input-wrapper">
                 <input
                   type="text"
@@ -103,23 +103,23 @@
                   </button>
                 }
               </div>
-              <div class="form-help-text">Use the alphanumeric ID from the Spotify playlist URL</div>
+              <div class="form-help-text">{{ 'PLAYLISTS.MANUAL_HELP' | translate }}</div>
               @if (playlistIdControl?.hasError('required') && playlistIdControl?.touched) {
                 <div class="error-message">
                   <i class="bi bi-exclamation-circle me-1"></i>
-                  Playlist ID is required
+                  {{ 'PLAYLISTS.ERR_REQUIRED' | translate }}
                 </div>
               }
               @if (playlistIdControl?.hasError('pattern') && playlistIdControl?.touched) {
                 <div class="error-message">
                   <i class="bi bi-exclamation-circle me-1"></i>
-                  Spotify IDs only contain letters and numbers
+                  {{ 'PLAYLISTS.ERR_PATTERN' | translate }}
                 </div>
               }
               @if (playlistIdControl?.hasError('minlength') && playlistIdControl?.touched) {
                 <div class="error-message">
                   <i class="bi bi-exclamation-circle me-1"></i>
-                  Playlist ID looks too short
+                  {{ 'PLAYLISTS.ERR_MINLENGTH' | translate }}
                 </div>
               }
             </div>
@@ -132,17 +132,17 @@
                 (click)="handleAction('playlist')"
               >
                 <i class="bi bi-playlist-x"></i>
-                <span>Clear Playlist</span>
+                <span>{{ 'PLAYLISTS.BTN_CLEAR' | translate }}</span>
               </button>
               <button
                 class="btn-action btn-action-danger"
                 type="button"
                 [disabled]="playlistForm.invalid || loadingService.loading()"
                 (click)="handleAction('playlistAndLibrary')"
-                [title]="'Also removes the same tracks from your saved library'"
+                [title]="'PLAYLISTS.DETAIL_CLEAR_LIB_DESC' | translate"
               >
                 <i class="bi bi-music-note-list"></i>
-                <span>Clear Playlist & Library</span>
+                <span>{{ 'PLAYLISTS.BTN_CLEAR_LIB' | translate }}</span>
               </button>
             </div>
           </form>
@@ -155,7 +155,7 @@
         <div class="card-header-modern">
           <div class="card-header-content">
             <i class="bi bi-info-circle me-2"></i>
-            <h5 class="card-title-modern">Operation Details</h5>
+            <h5 class="card-title-modern">{{ 'PLAYLISTS.DETAILS_TITLE' | translate }}</h5>
           </div>
         </div>
         <div class="card-body-modern">
@@ -164,8 +164,8 @@
               <i class="bi bi-playlist-x"></i>
             </div>
             <div class="info-content">
-              <h6 class="info-title">Clear Playlist</h6>
-              <p class="info-description">Deletes every track from the selected playlist but keeps them in your liked songs.</p>
+              <h6 class="info-title">{{ 'PLAYLISTS.DETAIL_CLEAR_TITLE' | translate }}</h6>
+              <p class="info-description">{{ 'PLAYLISTS.DETAIL_CLEAR_DESC' | translate }}</p>
             </div>
           </div>
 
@@ -176,28 +176,25 @@
               <i class="bi bi-exclamation-triangle"></i>
             </div>
             <div class="info-content">
-              <h6 class="info-title">Clear Playlist & Library</h6>
-              <p class="info-description">
-                Deletes tracks from both the playlist and your saved library. The Go backend stores a backup
-                before removal so you can recover songs when needed.
-              </p>
+              <h6 class="info-title">{{ 'PLAYLISTS.DETAIL_CLEAR_LIB_TITLE' | translate }}</h6>
+              <p class="info-description">{{ 'PLAYLISTS.DETAIL_CLEAR_LIB_DESC' | translate }}</p>
             </div>
           </div>
 
           <div class="tips-section">
-            <h6 class="tips-title">Important Notes</h6>
+            <h6 class="tips-title">{{ 'PLAYLISTS.NOTES_TITLE' | translate }}</h6>
             <ul class="tips-list">
               <li>
                 <i class="bi bi-check-circle-fill"></i>
-                <span>You must own or control the playlist to delete its tracks</span>
+                <span>{{ 'PLAYLISTS.NOTE_1' | translate }}</span>
               </li>
               <li>
                 <i class="bi bi-check-circle-fill"></i>
-                <span>Keep this tab open until the request finishes</span>
+                <span>{{ 'PLAYLISTS.NOTE_2' | translate }}</span>
               </li>
               <li>
                 <i class="bi bi-check-circle-fill"></i>
-                <span>Large playlists may take a few seconds due to Spotify rate limits</span>
+                <span>{{ 'PLAYLISTS.NOTE_3' | translate }}</span>
               </li>
             </ul>
           </div>
@@ -212,7 +209,7 @@
         <div class="card-header-modern">
           <div class="card-header-content">
             <i class="bi bi-clock-history me-2"></i>
-            <h5 class="card-title-modern">Last Operation</h5>
+            <h5 class="card-title-modern">{{ 'PLAYLISTS.LAST_OP' | translate }}</h5>
           </div>
         </div>
         <div class="card-body-modern">
@@ -222,10 +219,10 @@
             </div>
             <div class="status-details">
               <div class="status-title">
-                {{ lastOperation()!.action === 'playlist' ? 'Cleared playlist tracks' : 'Cleared playlist and library' }}
+                {{ (lastOperation()!.action === 'playlist' ? 'PLAYLISTS.OP_CLEARED' : 'PLAYLISTS.OP_CLEARED_LIB') | translate }}
               </div>
               <div class="status-meta">
-                <span class="status-id">Playlist ID: <code>{{ lastOperation()!.playlistId }}</code></span>
+                <span class="status-id">{{ 'PLAYLISTS.PLAYLIST_ID' | translate }}: <code>{{ lastOperation()!.playlistId }}</code></span>
                 <span class="status-separator">•</span>
                 <span class="status-time">{{ lastOperation()!.timestamp | date: 'medium' }}</span>
               </div>

@@ -29,6 +29,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { finalize } from 'rxjs/operators';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { PlaylistService } from '../../core/services/playlist.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -57,7 +58,8 @@ interface SamplePlaylist {
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    TranslateModule
   ],
 })
 export class PlaylistsComponent {
@@ -66,6 +68,7 @@ export class PlaylistsComponent {
   public loadingService = inject(LoadingService);
   private modalService = inject(NgbModal);
   private fb = inject(FormBuilder);
+  private translate = inject(TranslateService);
 
   playlistForm: FormGroup<PlaylistForm>;
   readonly samplePlaylists: readonly SamplePlaylist[] = [
@@ -92,27 +95,23 @@ export class PlaylistsComponent {
   
   selectedPlaylistId = signal<string | null>(null);
 
-  private actionCopy: Record<
-    PlaylistAction,
-    { title: string; message: string; confirmText: string; success: string; error: string }
-  > = {
+  // Use a computed to translate action strings dynamically
+  private actionCopy = computed(() => ({
     playlist: {
-      title: 'Clear playlist tracks',
-      message:
-        'Remove every track inside the selected playlist. The tracks will remain saved in your library.',
-      confirmText: 'Clear playlist',
-      success: 'Playlist tracks removed successfully',
-      error: 'Unable to remove tracks from playlist. Please try again.',
+      title: this.translate.instant('PLAYLISTS.ACTION_CLEAR_TITLE'),
+      message: this.translate.instant('PLAYLISTS.ACTION_CLEAR_MSG'),
+      confirmText: this.translate.instant('PLAYLISTS.ACTION_CLEAR_CONFIRM'),
+      success: this.translate.instant('PLAYLISTS.ACTION_CLEAR_SUCCESS'),
+      error: this.translate.instant('PLAYLISTS.ACTION_CLEAR_ERROR'),
     },
     playlistAndLibrary: {
-      title: 'Clear playlist and library',
-      message:
-        'Remove playlist tracks AND delete the same songs from your saved library. A backup is stored automatically.',
-      confirmText: 'Delete everywhere',
-      success: 'Playlist and library tracks removed successfully',
-      error: 'Unable to delete tracks from playlist and library. Please try again.',
+      title: this.translate.instant('PLAYLISTS.ACTION_CLEAR_LIB_TITLE'),
+      message: this.translate.instant('PLAYLISTS.ACTION_CLEAR_LIB_MSG'),
+      confirmText: this.translate.instant('PLAYLISTS.ACTION_CLEAR_LIB_CONFIRM'),
+      success: this.translate.instant('PLAYLISTS.ACTION_CLEAR_LIB_SUCCESS'),
+      error: this.translate.instant('PLAYLISTS.ACTION_CLEAR_LIB_ERROR'),
     },
-  };
+  }));
 
   constructor() {
     this.playlistForm = this.fb.group({
@@ -129,7 +128,7 @@ export class PlaylistsComponent {
     // Notify error if resource fails
     effect(() => {
       if (this.playlistsResource.error()) {
-        this.notificationService.error('Failed to load playlists. You can still enter a playlist ID manually.');
+        this.notificationService.error(this.translate.instant('PLAYLISTS.LOAD_ERROR'));
       }
     });
   }
@@ -166,15 +165,15 @@ export class PlaylistsComponent {
       return;
     }
 
-    const copy = this.actionCopy[action];
+    const copy = this.actionCopy()[action];
     const modalRef = this.modalService.open(ConfirmDialogComponent, {
       size: 'md',
       centered: true
     });
     modalRef.componentInstance.title = copy.title;
-    modalRef.componentInstance.message = `${copy.message}\n\nPlaylist ID: ${playlistId}`;
+    modalRef.componentInstance.message = `${copy.message}\n\n${this.translate.instant('PLAYLISTS.PLAYLIST_ID')}: ${playlistId}`;
     modalRef.componentInstance.confirmText = copy.confirmText;
-    modalRef.componentInstance.cancelText = 'Keep tracks';
+    modalRef.componentInstance.cancelText = this.translate.instant('PLAYLISTS.ACTION_CANCEL');
 
     modalRef.result.then(
       (confirmed) => {
