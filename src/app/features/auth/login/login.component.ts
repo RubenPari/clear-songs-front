@@ -1,51 +1,48 @@
-/**
- * Login Component
- *
- * @component
- * @selector app-login
- * @standalone true
- * @author Clear Songs Development Team
- */
-import { Component, inject, signal, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss'],
   standalone: true,
-  imports: [CommonModule, TranslateModule]
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
+  private fb = inject(FormBuilder);
   private authService = inject(AuthService);
-  private translate = inject(TranslateService);
-  private platformId = inject(PLATFORM_ID);
+  private router = inject(Router);
 
-  currentLang = signal('en');
+  loginForm: FormGroup = this.fb.group({
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', Validators.required]
+  });
 
-  constructor() {
-    if (isPlatformBrowser(this.platformId)) {
-      const savedLang = localStorage.getItem('app-lang-preference');
-      if (savedLang && ['en', 'it'].includes(savedLang)) {
-        this.currentLang.set(savedLang);
-        this.translate.use(savedLang);
+  isLoading = false;
+  errorMsg = '';
+
+  onLocalLogin() {
+    if (this.loginForm.invalid) return;
+
+    this.isLoading = true;
+    this.errorMsg = '';
+    
+    this.authService.localLogin(this.loginForm.value).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        this.router.navigate(['/']); // Redirect to dashboard
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMsg = err.error?.error?.message || 'Login failed.';
       }
-    }
+    });
   }
 
-  login(): void {
+  loginWithSpotify(): void {
     this.authService.login();
-  }
-
-  switchLanguage(): void {
-    const newLang = this.currentLang() === 'en' ? 'it' : 'en';
-    this.currentLang.set(newLang);
-    this.translate.use(newLang);
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('app-lang-preference', newLang);
-    }
   }
 }
