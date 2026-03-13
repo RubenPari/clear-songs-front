@@ -1,36 +1,17 @@
 /**
  * Main Layout Component
  * 
- * This is the main application layout that wraps all authenticated routes.
- * It provides the navigation structure, toolbar, and sidebar for the application.
- * 
- * Features:
- * - Responsive sidebar navigation (collapses on mobile)
- * - Application toolbar with user menu
- * - Dark/light theme toggle
- * - Global loading indicator overlay
- * - User profile display and logout functionality
- * 
- * The component uses Angular Signals for reactive state management and
- * BreakpointObserver for responsive behavior. The sidebar automatically
- * adapts to screen size (overlay on mobile, persistent on desktop).
- * 
- * Layout Structure:
- * - Sidebar: Navigation menu with links to main features
- * - Toolbar: App title, theme toggle, user menu
- * - Content Area: Router outlet for child components
- * - Loading Overlay: Global loading indicator
- * 
  * @component
  * @selector app-main-layout
  * @standalone true
  * @author Clear Songs Development Team
  */
-import { Component, Inject, Renderer2, signal, inject, PLATFORM_ID, effect, untracked } from '@angular/core';
+import { Component, Renderer2, signal, inject, PLATFORM_ID, effect, untracked } from '@angular/core';
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { NgbOffcanvas, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { AuthService } from '../../core/services/auth.service';
 import { LoadingService } from '../../core/services/loading.service';
@@ -45,24 +26,31 @@ import { LoadingService } from '../../core/services/loading.service';
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
-    NgbModule
+    NgbModule,
+    TranslateModule
   ]
 })
 export class MainLayoutComponent {
   private readonly THEME_KEY = 'app-theme-preference';
+  private readonly LANG_KEY = 'app-lang-preference';
   private renderer = inject(Renderer2);
   private document = inject(DOCUMENT);
   private platformId = inject(PLATFORM_ID);
   private offcanvasService = inject(NgbOffcanvas);
+  private translate = inject(TranslateService);
   public authService = inject(AuthService);
   public loadingService = inject(LoadingService);
 
   isHandset = signal(false);
   isDarkTheme = signal(false);
+  currentLang = signal('en');
 
   constructor() {
+    // Initialize translate
+    this.translate.addLangs(['en', 'it']);
+
     if (isPlatformBrowser(this.platformId)) {
-      // Setup handset detection using a simple event listener and signal
+      // Setup handset detection
       this.isHandset.set(window.innerWidth < 768);
       window.addEventListener('resize', () => {
         this.isHandset.set(window.innerWidth < 768);
@@ -76,9 +64,18 @@ export class MainLayoutComponent {
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         this.isDarkTheme.set(prefersDark);
       }
+
+      // Load language preference
+      const savedLang = localStorage.getItem(this.LANG_KEY);
+      if (savedLang && ['en', 'it'].includes(savedLang)) {
+        this.currentLang.set(savedLang);
+        this.translate.use(savedLang);
+      } else {
+        this.translate.use('en');
+      }
     }
 
-    // Effect for applying theme automatically when isDarkTheme signal changes
+    // Effect for applying theme
     effect(() => {
       const isDark = this.isDarkTheme();
       if (isDark) {
@@ -97,6 +94,15 @@ export class MainLayoutComponent {
 
   toggleTheme(): void {
     this.isDarkTheme.update(value => !value);
+  }
+
+  switchLanguage(): void {
+    const newLang = this.currentLang() === 'en' ? 'it' : 'en';
+    this.currentLang.set(newLang);
+    this.translate.use(newLang);
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem(this.LANG_KEY, newLang);
+    }
   }
 
   logout(): void {

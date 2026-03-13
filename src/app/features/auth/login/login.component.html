@@ -13,36 +13,42 @@
           <div class="logo-icon">🎵</div>
           <div class="logo-glow"></div>
         </div>
-        <h1>Clear Songs</h1>
-        <p class="tagline">Manage your Spotify library with precision and ease</p>
+        <h1>{{ 'LOGIN.TITLE' | translate }}</h1>
+        <p class="tagline">{{ 'LOGIN.TAGLINE' | translate }}</p>
       </div>
   
       <div class="features-grid">
         <div class="feature-card">
           <div class="feature-icon"><i class="bi bi-music-note-list"></i></div>
           <div class="feature-content">
-            <h6>Remove by Artist</h6>
-            <p>Delete tracks from specific artists</p>
+            <h6>{{ 'LOGIN.FEATURE_ARTIST_TITLE' | translate }}</h6>
+            <p>{{ 'LOGIN.FEATURE_ARTIST_DESC' | translate }}</p>
           </div>
         </div>
         <div class="feature-card">
           <div class="feature-icon"><i class="bi bi-playlist"></i></div>
           <div class="feature-content">
-            <h6>Playlist Cleanup</h6>
-            <p>Clear playlists efficiently</p>
+            <h6>{{ 'LOGIN.FEATURE_PLAYLIST_TITLE' | translate }}</h6>
+            <p>{{ 'LOGIN.FEATURE_PLAYLIST_DESC' | translate }}</p>
           </div>
         </div>
+      </div>
+
+      <div class="lang-toggle">
+        <button class="btn btn-sm btn-lang" (click)="switchLanguage()">
+          <span>{{ currentLang() === 'en' ? '🇮🇹 Italiano' : '🇬🇧 English' }}</span>
+        </button>
       </div>
   
       <button class="btn spotify-login-btn" (click)="login()">
         <i class="bi bi-spotify me-2"></i>
-        <span>Continue with Spotify</span>
+        <span>{{ 'LOGIN.CONTINUE_SPOTIFY' | translate }}</span>
         <i class="bi bi-arrow-right ms-2"></i>
       </button>
   
       <div class="disclaimer">
         <i class="bi bi-info-circle me-2"></i>
-        <span>We only access your library to help you manage it. All deletions are backed up.</span>
+        <span>{{ 'LOGIN.DISCLAIMER' | translate }}</span>
       </div>
     </div>
   </div>
