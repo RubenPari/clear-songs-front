@@ -26,6 +26,7 @@ import { Component, OnInit, DestroyRef, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 
@@ -34,9 +35,9 @@ import { NotificationService } from '../../../core/services/notification.service
   template: `
     <div class="callback-container">
       <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-        <span class="visually-hidden">Loading...</span>
+        <span class="visually-hidden">{{ 'COMMON.LOADING' | translate }}</span>
       </div>
-      <p>Authenticating with Spotify...</p>
+      <p>{{ 'CALLBACK.AUTHENTICATING' | translate }}</p>
     </div>
   `,
   styles: [
@@ -57,7 +58,7 @@ import { NotificationService } from '../../../core/services/notification.service
     `,
   ],
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule, TranslateModule]
 })
 export class CallbackComponent implements OnInit {
   /**
@@ -78,7 +79,8 @@ export class CallbackComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private authService: AuthService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private translate: TranslateService
   ) {}
 
   /**
@@ -119,11 +121,11 @@ export class CallbackComponent implements OnInit {
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
               next: () => {
-                this.notificationService.success('Successfully logged in to Spotify!');
+                this.notificationService.success(this.translate.instant('CALLBACK.LOGIN_SUCCESS'));
                 this.router.navigate(['/dashboard']);
               },
               error: () => {
-                this.notificationService.error('Failed to authenticate with Spotify');
+                this.notificationService.error(this.translate.instant('CALLBACK.LOGIN_FAILED'));
                 this.router.navigate(['/login']);
               },
             });
@@ -134,15 +136,15 @@ export class CallbackComponent implements OnInit {
             .subscribe({
               next: (isAuthenticated) => {
                 if (isAuthenticated) {
-                  this.notificationService.success('Successfully logged in to Spotify!');
+                  this.notificationService.success(this.translate.instant('CALLBACK.LOGIN_SUCCESS'));
                   this.router.navigate(['/dashboard']);
                 } else {
-                  this.notificationService.error('Authentication failed');
+                  this.notificationService.error(this.translate.instant('CALLBACK.AUTH_FAILED'));
                   this.router.navigate(['/login']);
                 }
               },
               error: () => {
-                this.notificationService.error('Failed to verify authentication');
+                this.notificationService.error(this.translate.instant('CALLBACK.VERIFY_FAILED'));
                 this.router.navigate(['/login']);
               },
             });

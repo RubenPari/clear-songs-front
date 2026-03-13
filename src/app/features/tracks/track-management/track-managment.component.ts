@@ -34,6 +34,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { finalize } from 'rxjs/operators';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { TrackService } from '../../../core/services/track.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { LoadingService } from '../../../core/services/loading.service';
@@ -70,7 +71,8 @@ interface PresetRange {
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    TranslateModule
   ]
 })
 export class TrackManagementComponent {
@@ -79,6 +81,7 @@ export class TrackManagementComponent {
   private notificationService = inject(NotificationService);
   public loadingService = inject(LoadingService);
   private modalService = inject(NgbModal);
+  private translate = inject(TranslateService);
 
   /**
    * Reactive form for range input
@@ -89,11 +92,11 @@ export class TrackManagementComponent {
    * Preset range configurations for quick selection
    */
   readonly presetRanges: readonly PresetRange[] = [
-    { label: 'Singles (1 track)', min: 1, max: 1 },
-    { label: 'EPs (2-5 tracks)', min: 2, max: 5 },
-    { label: 'Small Collections (6-10 tracks)', min: 6, max: 10 },
-    { label: 'Albums (11-20 tracks)', min: 11, max: 20 },
-    { label: 'Large Collections (20+ tracks)', min: 20, max: null },
+    { label: 'TRACKS.PRESET_SINGLES', min: 1, max: 1 },
+    { label: 'TRACKS.PRESET_EPS', min: 2, max: 5 },
+    { label: 'TRACKS.PRESET_SMALL', min: 6, max: 10 },
+    { label: 'TRACKS.PRESET_ALBUMS', min: 11, max: 20 },
+    { label: 'TRACKS.PRESET_LARGE', min: 20, max: null },
   ] as const;
 
   constructor() {
@@ -122,16 +125,16 @@ export class TrackManagementComponent {
     }
 
     const { min, max } = this.rangeForm.value;
-    let message = 'Are you sure you want to delete tracks from artists with ';
+    let message = '';
 
     if (min !== null && max !== null) {
-      message += `${min} to ${max} tracks?`;
+      message = this.translate.instant('TRACKS.DELETE_MSG_RANGE', { min, max });
     } else if (min !== null) {
-      message += `at least ${min} tracks?`;
+      message = this.translate.instant('TRACKS.DELETE_MSG_MIN', { min });
     } else if (max !== null) {
-      message += `at most ${max} tracks?`;
+      message = this.translate.instant('TRACKS.DELETE_MSG_MAX', { max });
     } else {
-      this.notificationService.warning('Please specify at least one range value');
+      this.notificationService.warning(this.translate.instant('TRACKS.NO_RANGE'));
       return;
     }
 
@@ -139,10 +142,10 @@ export class TrackManagementComponent {
       size: 'md',
       centered: true
     });
-    modalRef.componentInstance.title = 'Delete Tracks by Range';
+    modalRef.componentInstance.title = this.translate.instant('TRACKS.DELETE_TITLE');
     modalRef.componentInstance.message = message;
-    modalRef.componentInstance.confirmText = 'Delete';
-    modalRef.componentInstance.cancelText = 'Cancel';
+    modalRef.componentInstance.confirmText = this.translate.instant('COMMON.DELETE');
+    modalRef.componentInstance.cancelText = this.translate.instant('COMMON.CANCEL');
 
     modalRef.result.then(
       (result) => {
@@ -154,11 +157,11 @@ export class TrackManagementComponent {
             )
             .subscribe({
               next: () => {
-                this.notificationService.success('Successfully deleted tracks in the specified range');
+                this.notificationService.success(this.translate.instant('TRACKS.DELETE_SUCCESS'));
                 this.rangeForm.reset();
               },
               error: () => {
-                this.notificationService.error('Failed to delete tracks');
+                this.notificationService.error(this.translate.instant('TRACKS.DELETE_ERROR'));
               },
             });
         }

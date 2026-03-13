@@ -2,6 +2,7 @@ import { Component, Input, OnInit, inject, signal, computed } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { finalize, forkJoin } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { Track, ArtistSummary } from '../../core/models/artist.model';
 import { TrackService } from '../../core/services/track.service';
@@ -17,24 +18,24 @@ interface AlbumGroup {
 @Component({
   selector: 'app-artist-tracks-modal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   template: `
     <div class="modal-header">
-      <h5 class="modal-title">Tracks by {{ artist.name }}</h5>
+      <h5 class="modal-title">{{ translate.instant('ARTIST_MODAL.TITLE', { name: artist.name }) }}</h5>
       <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss()"></button>
     </div>
     <div class="modal-body">
       @if (isLoading()) {
         <div class="text-center p-5">
           <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
+            <span class="visually-hidden">{{ 'COMMON.LOADING' | translate }}</span>
           </div>
-          <p class="mt-2 text-muted">Loading tracks...</p>
+          <p class="mt-2 text-muted">{{ 'ARTIST_MODAL.LOADING' | translate }}</p>
         </div>
       } @else if (tracks().length === 0) {
         <div class="text-center p-5">
           <i class="bi bi-music-note-beamed" style="font-size: 3rem; color: #cbd5e1;"></i>
-          <p class="mt-2 text-muted">No tracks found for this artist.</p>
+          <p class="mt-2 text-muted">{{ 'ARTIST_MODAL.NO_TRACKS' | translate }}</p>
         </div>
       } @else {
         @for (group of albumGroups(); track group.album) {
@@ -51,21 +52,21 @@ interface AlbumGroup {
                 }
                 <div class="album-info">
                   <span class="album-name">{{ group.album }}</span>
-                  <span class="album-count">{{ group.tracks.length }} {{ group.tracks.length === 1 ? 'track' : 'tracks' }}</span>
+                  <span class="album-count">{{ group.tracks.length }} {{ group.tracks.length === 1 ? ('ARTIST_MODAL.TRACK' | translate) : ('ARTIST_MODAL.TRACKS' | translate) }}</span>
                 </div>
               </div>
               <button
                 class="btn btn-sm btn-outline-danger delete-album-btn"
                 (click)="deleteAlbumTracks(group, $event)"
                 [disabled]="deletingAlbum() === group.album"
-                title="Delete all tracks from this album"
+                [title]="('COMMON.DELETE_ALL_FROM' | translate) + group.album"
               >
                 @if (deletingAlbum() === group.album) {
                   <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                 } @else {
                   <i class="bi bi-trash"></i>
                 }
-                <span class="ms-1">Delete Album</span>
+                <span class="ms-1">{{ 'ARTIST_MODAL.DELETE_ALBUM_BTN' | translate }}</span>
               </button>
             </div>
 
@@ -78,7 +79,7 @@ interface AlbumGroup {
                       class="btn btn-sm btn-outline-danger"
                       (click)="deleteTrack(track)"
                       [disabled]="deletingTrackId() === track.id"
-                      title="Delete track"
+                      [title]="'COMMON.DELETE' | translate"
                     >
                       @if (deletingTrackId() === track.id) {
                         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -95,7 +96,7 @@ interface AlbumGroup {
       }
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="activeModal.close(tracksChanged())">Close</button>
+      <button type="button" class="btn btn-secondary" (click)="activeModal.close(tracksChanged())">{{ 'COMMON.CLOSE' | translate }}</button>
     </div>
   `,
   styles: [`
@@ -208,6 +209,7 @@ export class ArtistTracksModalComponent implements OnInit {
   private trackService = inject(TrackService);
   private notificationService = inject(NotificationService);
   private modalService = inject(NgbModal);
+  public translate = inject(TranslateService);
 
   tracks = signal<Track[]>([]);
   isLoading = signal<boolean>(true);
@@ -251,7 +253,7 @@ export class ArtistTracksModalComponent implements OnInit {
             this.tracks.set([]);
           }
         },
-        error: () => this.notificationService.error('Failed to load tracks')
+        error: () => this.notificationService.error(this.translate.instant('ARTIST_MODAL.LOAD_ERROR'))
       });
   }
 
@@ -278,10 +280,10 @@ export class ArtistTracksModalComponent implements OnInit {
       size: 'md',
       centered: true
     });
-    modalRef.componentInstance.title = 'Delete Album Tracks';
-    modalRef.componentInstance.message = `Are you sure you want to delete all ${group.tracks.length} tracks from "${group.album}"?`;
-    modalRef.componentInstance.confirmText = 'Delete All';
-    modalRef.componentInstance.cancelText = 'Cancel';
+    modalRef.componentInstance.title = this.translate.instant('ARTIST_MODAL.DELETE_ALBUM_TITLE');
+    modalRef.componentInstance.message = this.translate.instant('ARTIST_MODAL.DELETE_ALBUM_MSG', { count: group.tracks.length, album: group.album });
+    modalRef.componentInstance.confirmText = this.translate.instant('ARTIST_MODAL.DELETE_ALBUM_CONFIRM');
+    modalRef.componentInstance.cancelText = this.translate.instant('COMMON.CANCEL');
 
     modalRef.result.then((result) => {
       if (result) {
@@ -295,13 +297,13 @@ export class ArtistTracksModalComponent implements OnInit {
               const deletedIds = new Set(group.tracks.map(t => t.id));
               this.tracks.update(t => t.filter(item => !deletedIds.has(item.id)));
               this.tracksChanged.set(true);
-              this.notificationService.success(`Deleted ${group.tracks.length} tracks from "${group.album}"`);
+              this.notificationService.success(this.translate.instant('ARTIST_MODAL.DELETE_ALBUM_SUCCESS', { count: group.tracks.length, album: group.album }));
 
               if (this.tracks().length === 0) {
                 this.activeModal.close(true);
               }
             },
-            error: () => this.notificationService.error('Failed to delete some tracks')
+            error: () => this.notificationService.error(this.translate.instant('ARTIST_MODAL.DELETE_ALBUM_ERROR'))
           });
       }
     }, () => {});
@@ -312,10 +314,10 @@ export class ArtistTracksModalComponent implements OnInit {
       size: 'md',
       centered: true
     });
-    modalRef.componentInstance.title = 'Delete Track';
-    modalRef.componentInstance.message = `Are you sure you want to delete "${track.name}" from your library?`;
-    modalRef.componentInstance.confirmText = 'Delete';
-    modalRef.componentInstance.cancelText = 'Cancel';
+    modalRef.componentInstance.title = this.translate.instant('ARTIST_MODAL.DELETE_TRACK_TITLE');
+    modalRef.componentInstance.message = this.translate.instant('ARTIST_MODAL.DELETE_TRACK_MSG', { name: track.name });
+    modalRef.componentInstance.confirmText = this.translate.instant('COMMON.DELETE');
+    modalRef.componentInstance.cancelText = this.translate.instant('COMMON.CANCEL');
 
     modalRef.result.then((result) => {
       if (result) {
@@ -324,7 +326,7 @@ export class ArtistTracksModalComponent implements OnInit {
           .pipe(finalize(() => this.deletingTrackId.set(null)))
           .subscribe({
             next: () => {
-              this.notificationService.success('Track deleted successfully');
+              this.notificationService.success(this.translate.instant('ARTIST_MODAL.DELETE_TRACK_SUCCESS'));
               this.tracks.update(t => t.filter(item => item.id !== track.id));
               this.tracksChanged.set(true);
 
@@ -332,7 +334,7 @@ export class ArtistTracksModalComponent implements OnInit {
                 this.activeModal.close(true);
               }
             },
-            error: () => this.notificationService.error('Failed to delete track')
+            error: () => this.notificationService.error(this.translate.instant('ARTIST_MODAL.DELETE_TRACK_ERROR'))
           });
       }
     }, () => {});
