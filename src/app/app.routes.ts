@@ -21,6 +21,10 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
 import { LoginComponent } from './features/auth/login/login.component';
+import { RegisterComponent } from './features/auth/register/register.component';
+import { ConfirmEmailComponent } from './features/auth/confirm-email/confirm-email.component';
+import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './features/auth/reset-password/reset-password.component';
 import { CallbackComponent } from './features/auth/callback/callback.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { PlaylistsComponent } from './features/playlists/playlists.component';
@@ -46,6 +50,22 @@ export const routes: Routes = [
   {
     path: 'login',
     component: LoginComponent,
+  },
+  {
+    path: 'register',
+    component: RegisterComponent,
+  },
+  {
+    path: 'confirm-email',
+    component: ConfirmEmailComponent,
+  },
+  {
+    path: 'forgot-password',
+    component: ForgotPasswordComponent,
+  },
+  {
+    path: 'reset-password',
+    component: ResetPasswordComponent,
   },
   
   /**

@@ -90,17 +90,50 @@ export class AuthService {
     );
   }
 
-  logout(): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/logout`, {}).pipe(
-      tap(() => {
-        localStorage.removeItem('isAuthenticated');
-        this.sessionResource.reload();
-        this.router.navigate(['/login']);
-      }),
+	logout(): Observable<AuthResponse> {
+		return this.http.post<AuthResponse>(`${this.apiUrl}/local-auth/logout`, {}).pipe(
+			tap(() => {
+        // Also call Spotify logout just in case
+        this.http.get(`${this.apiUrl}/auth/logout`).subscribe();
+				localStorage.removeItem('isAuthenticated');
+				this.sessionResource.reload();
+				this.router.navigate(['/login']);
+			}),
+		);
+	}
+
+  register(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/local-auth/register`, data);
+  }
+
+  localLogin(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/local-auth/login`, data).pipe(
+      tap((res: any) => {
+        if (res.success) {
+          localStorage.setItem('isAuthenticated', 'true');
+          this.sessionResource.reload();
+        }
+      })
     );
   }
 
-  checkAuthStatus(): Observable<boolean> {
+  confirmEmail(token: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/local-auth/confirm-email?token=${token}`);
+  }
+
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/local-auth/forgot-password`, { email });
+  }
+
+  resetPassword(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/local-auth/reset-password`, data);
+  }
+
+  changePassword(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/local-auth/change-password`, data);
+  }
+
+	checkAuthStatus(): Observable<boolean> {
     console.log('🛡️ Checking auth status...');
     return toObservable(this.sessionResource.status, { injector: this.injector }).pipe(
       tap(status => console.log('🔄 Session resource status:', status)),
