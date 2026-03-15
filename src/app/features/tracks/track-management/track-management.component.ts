@@ -28,10 +28,9 @@
  * @standalone true
  * @author Clear Songs Development Team
  */
-import { Component, DestroyRef, inject } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors, FormControl } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { finalize } from 'rxjs/operators';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -40,17 +39,6 @@ import { NotificationService } from '../../../core/services/notification.service
 import { LoadingService } from '../../../core/services/loading.service';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 
-/**
- * Range Form Interface
- * 
- * Defines the structure of the range form with optional min and max values.
- * Both values can be null to allow flexible range queries (e.g., only min,
- * only max, or both).
- */
-interface RangeForm {
-  min: number | null;
-  max: number | null;
-}
 
 /**
  * Preset Range Interface
@@ -86,7 +74,7 @@ export class TrackManagementComponent {
   /**
    * Reactive form for range input
    */
-  rangeForm: FormGroup<{ min: any; max: any }>;
+  rangeForm: FormGroup<{ min: FormControl<number | null>; max: FormControl<number | null> }>;
   
   /**
    * Preset range configurations for quick selection
@@ -102,8 +90,8 @@ export class TrackManagementComponent {
   constructor() {
     this.rangeForm = this.fb.group(
       {
-        min: [null, [Validators.min(0)]],
-        max: [null, [Validators.min(0)]],
+        min: this.fb.control<number | null>(null, [Validators.min(0)]),
+        max: this.fb.control<number | null>(null, [Validators.min(0)]),
       },
       { validators: TrackManagementComponent.rangeValidator }
     );
@@ -151,7 +139,9 @@ export class TrackManagementComponent {
       (result) => {
         if (result) {
           this.loadingService.show();
-          this.trackService.deleteTracksByRange(min, max)
+          const minValue = min ?? undefined;
+          const maxValue = max ?? undefined;
+          this.trackService.deleteTracksByRange(minValue, maxValue)
             .pipe(
               finalize(() => this.loadingService.hide())
             )

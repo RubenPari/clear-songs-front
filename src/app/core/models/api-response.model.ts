@@ -46,8 +46,18 @@ export interface ApiResponse<T = unknown> {
   /** Optional response data (type depends on the endpoint) */
   data?: T;
   
-  /** Optional error message if the operation failed */
-  error?: string;
+  /** Optional structured error if the operation failed */
+  error?: ApiError | string;
+}
+
+/**
+ * API Error Interface
+ *
+ * Structured error payload returned by backend endpoints.
+ */
+export interface ApiError {
+  code: string;
+  message: string;
 }
 
 /**
@@ -75,10 +85,10 @@ export interface User {
   profile_image?: string;
   
   /** ISO 8601 timestamp when the user account was created */
-  created_at: string;
+  created_at?: string;
   
   /** ISO 8601 timestamp when the user account was last updated */
-  updated_at: string;
+  updated_at?: string;
 }
 
 /**
@@ -89,16 +99,4 @@ export interface User {
  * 
  * @interface AuthResponse
  */
-export interface AuthResponse {
-  /** Indicates whether authentication was successful */
-  success: boolean;
-  
-  /** Optional message describing the authentication result */
-  message?: string;
-  
-  /** Optional user object if authentication was successful */
-  user?: User;
-  
-  /** Optional error message if authentication failed */
-  error?: string;
-}
+export type AuthResponse = ApiResponse<{ user?: User }> & { user?: User };

@@ -8,6 +8,7 @@ import { Track, ArtistSummary } from '../../core/models/artist.model';
 import { TrackService } from '../../core/services/track.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { ApiResponse } from '../../core/models/api-response.model';
 
 interface AlbumGroup {
   album: string;
@@ -244,14 +245,8 @@ export class ArtistTracksModalComponent implements OnInit {
     this.trackService.getTracksByArtist(this.artist.id)
       .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
-        next: (response: any) => {
-          if (response && response.success && Array.isArray(response.data)) {
-            this.tracks.set(response.data);
-          } else if (Array.isArray(response)) {
-            this.tracks.set(response);
-          } else {
-            this.tracks.set([]);
-          }
+        next: (response: ApiResponse<Track[]>) => {
+          this.tracks.set(Array.isArray(response.data) ? response.data : []);
         },
         error: () => this.notificationService.error(this.translate.instant('ARTIST_MODAL.LOAD_ERROR'))
       });

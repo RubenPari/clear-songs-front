@@ -1,19 +1,24 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController } from '@angular/common/http/testing';
 import { PlaylistService } from './playlist.service';
 import { environment } from '../../../environments/environment';
 import { UserPlaylist } from '../models/artist.model';
+import { ApiResponse } from '../models/api-response.model';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
 
 describe('PlaylistService', () => {
   let service: PlaylistService;
   let httpMock: HttpTestingController;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     TestBed.configureTestingModule({
+      imports: [TranslateModule.forRoot()],
       providers: [
         PlaylistService,
+        provideZonelessChangeDetection(),
         provideHttpClient(),
         provideHttpClientTesting()
       ]
@@ -27,28 +32,36 @@ describe('PlaylistService', () => {
     httpMock.verify();
   });
 
-  it('should be created', () => {
+  it('should be created', async () => {
     expect(service).toBeTruthy();
   });
 
-  it('should fetch user playlists using httpResource', () => {
+  it('should fetch user playlists using httpResource', async () => {
     const mockPlaylists: UserPlaylist[] = [
-      { id: '1', name: 'Playlist 1', owner: 'User 1' },
-      { id: '2', name: 'Playlist 2', owner: 'User 2' }
+      { id: '1', name: 'Playlist 1' },
+      { id: '2', name: 'Playlist 2' }
     ];
 
-    const resource = service.getUserPlaylistsResource();
+    const resource = TestBed.runInInjectionContext(() => service.getUserPlaylistsResource());
+    
+    // Trigger the resource
+    resource.value();
+    TestBed.flushEffects();
     
     // httpResource will trigger a request
-    const req = httpMock.expectOne(`${environment.apiUrl}/playlist/list`);
+    const req = httpMock.expectOne(req => req.url.includes('/playlist/list'));
     expect(req.request.method).toBe('GET');
-    req.flush(mockPlaylists);
+    req.flush({ success: true, data: mockPlaylists } satisfies ApiResponse<UserPlaylist[]>);
 
-    // After flush, we can check the resource value
-    // In a real test environment with Signals, this happens after a microtask or tick
-    setTimeout(() => {
-        expect(resource.value()).toEqual(mockPlaylists);
-    }, 0);
+    // Wait for the resource to update its value
+    TestBed.flushEffects();
+    await Promise.resolve();
+    const value = resource.value();
+    if (Array.isArray(value)) {
+      expect(value).toEqual(mockPlaylists);
+    } else {
+      expect(value?.data).toEqual(mockPlaylists);
+    }
   });
 
   it('should delete playlist tracks', () => {

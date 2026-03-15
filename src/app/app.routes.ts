@@ -28,7 +28,7 @@ import { ResetPasswordComponent } from './features/auth/reset-password/reset-pas
 import { CallbackComponent } from './features/auth/callback/callback.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { PlaylistsComponent } from './features/playlists/playlists.component';
-import { TrackManagementComponent } from './features/tracks/track-management/track-managment.component';
+import { TrackManagementComponent } from './features/tracks/track-management/track-management.component';
 
 /**
  * Application Routes

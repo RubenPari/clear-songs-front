@@ -28,13 +28,16 @@
  * @providedIn root
  * @author Clear Songs Development Team
  */
-import { Injectable, inject, Injector, signal, effect, computed, ResourceStatus } from '@angular/core';
+import { Injectable, inject, Injector, signal, effect, computed } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { environment } from '../../../environments/environment';
-import { Observable, tap, filter, map, take } from 'rxjs';
+import { Observable, tap, filter, map, take, switchMap, catchError, of } from 'rxjs';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { AuthResponse } from '../models/api-response.model';
+import { ApiResponse, User } from '../models/api-response.model';
+
+const RESOURCE_STATUS_RESOLVED = 'resolved';
+const RESOURCE_STATUS_ERROR = 'error';
 
 @Injectable({
   providedIn: 'root',
@@ -48,27 +51,26 @@ export class AuthService {
   /**
    * Session Resource using httpResource.
    */
-  public sessionResource = httpResource<AuthResponse>(() => `${this.apiUrl}/auth/is-auth`);
+  public sessionResource = httpResource<ApiResponse<{ user?: User }>>(() => `${this.apiUrl}/auth/is-auth`);
 
   /**
    * Auth state derived from the resource
    */
   public isAuthenticated = computed(() => !!this.sessionResource.value()?.success);
 
-  private _currentUser = signal<any>(null);
+  private _currentUser = signal<User | null>(null);
   public currentUser = this._currentUser.asReadonly();
-
-    constructor() {
+  constructor() {
     // Sync localStorage with session status
     effect(() => {
       const session = this.sessionResource.value();
       const isAuth = !!session?.success;
-      const status = this.sessionResource.status() as any;
+      const status = this.sessionResource.status();
       
       if (isAuth) {
         localStorage.setItem('isAuthenticated', 'true');
-        this._currentUser.set(session?.user);
-      } else if (status === 'resolved' || status === 'error' || status === 3 || status === 4) {
+        this._currentUser.set(session?.data?.user ?? null);
+      } else if (status === RESOURCE_STATUS_RESOLVED || status === RESOURCE_STATUS_ERROR) {
         localStorage.removeItem('isAuthenticated');
         this._currentUser.set(null);
       }
@@ -79,8 +81,8 @@ export class AuthService {
     window.location.href = `${this.apiUrl}/auth/login`;
   }
 
-  handleCallback(code: string): Observable<AuthResponse> {
-    return this.http.get<AuthResponse>(`${this.apiUrl}/auth/callback?code=${code}`).pipe(
+  handleCallback(code: string): Observable<ApiResponse> {
+    return this.http.get<ApiResponse>(`${this.apiUrl}/auth/callback?code=${code}`).pipe(
       tap((response) => {
         if (response.success) {
           localStorage.setItem('isAuthenticated', 'true');
@@ -90,25 +92,29 @@ export class AuthService {
     );
   }
 
-	logout(): Observable<AuthResponse> {
-		return this.http.post<AuthResponse>(`${this.apiUrl}/local-auth/logout`, {}).pipe(
-			tap(() => {
-        // Also call Spotify logout just in case
-        this.http.get(`${this.apiUrl}/auth/logout`).subscribe();
-				localStorage.removeItem('isAuthenticated');
-				this.sessionResource.reload();
-				this.router.navigate(['/login']);
-			}),
-		);
-	}
-
-  register(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/local-auth/register`, data);
+  logout(): Observable<ApiResponse> {
+    return this.http.post<ApiResponse>(`${this.apiUrl}/local-auth/logout`, {}).pipe(
+      switchMap((localLogoutResponse) =>
+        this.http.get<ApiResponse>(`${this.apiUrl}/auth/logout`).pipe(
+          map(() => localLogoutResponse),
+          catchError(() => of(localLogoutResponse))
+        )
+      ),
+      tap(() => {
+        localStorage.removeItem('isAuthenticated');
+        this.sessionResource.reload();
+        this.router.navigate(['/login']);
+      }),
+    );
   }
 
-  localLogin(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/local-auth/login`, data).pipe(
-      tap((res: any) => {
+  register(data: { email: string; password: string }): Observable<ApiResponse<{ message?: string }>> {
+    return this.http.post<ApiResponse<{ message?: string }>>(`${this.apiUrl}/local-auth/register`, data);
+  }
+
+  localLogin(data: { email: string; password: string }): Observable<ApiResponse<{ user?: User }>> {
+    return this.http.post<ApiResponse<{ user?: User }>>(`${this.apiUrl}/local-auth/login`, data).pipe(
+      tap((res) => {
         if (res.success) {
           localStorage.setItem('isAuthenticated', 'true');
           this.sessionResource.reload();
@@ -117,31 +123,27 @@ export class AuthService {
     );
   }
 
-  confirmEmail(token: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/local-auth/confirm-email?token=${token}`);
+  confirmEmail(token: string): Observable<ApiResponse<{ message?: string }>> {
+    return this.http.get<ApiResponse<{ message?: string }>>(`${this.apiUrl}/local-auth/confirm-email?token=${token}`);
   }
 
-  forgotPassword(email: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/local-auth/forgot-password`, { email });
+  forgotPassword(email: string): Observable<ApiResponse<{ message?: string }>> {
+    return this.http.post<ApiResponse<{ message?: string }>>(`${this.apiUrl}/local-auth/forgot-password`, { email });
   }
 
-  resetPassword(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/local-auth/reset-password`, data);
+  resetPassword(data: { token: string; newPassword: string }): Observable<ApiResponse> {
+    return this.http.post<ApiResponse>(`${this.apiUrl}/local-auth/reset-password`, data);
   }
 
-  changePassword(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/local-auth/change-password`, data);
+  changePassword(data: { oldPassword: string; newPassword: string }): Observable<ApiResponse> {
+    return this.http.post<ApiResponse>(`${this.apiUrl}/local-auth/change-password`, data);
   }
 
-	checkAuthStatus(): Observable<boolean> {
-    console.log('🛡️ Checking auth status...');
+  checkAuthStatus(): Observable<boolean> {
     return toObservable(this.sessionResource.status, { injector: this.injector }).pipe(
-      tap(status => console.log('🔄 Session resource status:', status)),
-      // Wait until status is Resolved or Error
-      filter(status => (status as any) === 'resolved' || (status as any) === 'error' || (status as any) === 3 || (status as any) === 4),
+      filter((status) => status === RESOURCE_STATUS_RESOLVED || status === RESOURCE_STATUS_ERROR),
       map(() => {
         const val = this.sessionResource.value();
-        console.log('📋 Session resource resolved:', !!val?.success);
         return !!val?.success;
       }),
       take(1)

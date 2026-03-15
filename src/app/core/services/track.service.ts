@@ -41,7 +41,7 @@ export class TrackService {
    * This automatically integrates with HttpClient, interceptors, and signals.
    */
   getTrackSummaryResource(min?: number, max?: number) {
-    return httpResource<ArtistSummary[]>(() => {
+    return httpResource<ApiResponse<ArtistSummary[]>>(() => {
       const params = buildRangeParams(min, max);
       return `${this.apiUrl}/summary?${params.toString()}`;
     });
@@ -60,8 +60,8 @@ export class TrackService {
     return this.http.delete<ApiResponse>(`${this.apiUrl}/by-range`, { params });
   }
 
-  getTracksByArtist(artistId: string): Observable<Track[]> {
-    return this.http.get<Track[]>(`${this.apiUrl}/by-artist/${artistId}`);
+  getTracksByArtist(artistId: string): Observable<ApiResponse<Track[]>> {
+    return this.http.get<ApiResponse<Track[]>>(`${this.apiUrl}/by-artist/${artistId}`);
   }
 
   deleteTrack(trackId: string): Observable<ApiResponse> {

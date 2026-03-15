@@ -29,9 +29,6 @@ import { appConfig } from './app/app.config';
  * @param App - The root component class
  * @param appConfig - Application configuration containing providers, routes, etc.
  */
-console.log('🚀 Bootstrapping application...');
-bootstrapApplication(App, appConfig).then(() => {
-  console.log('✅ Application bootstrapped successfully');
-}).catch((err: unknown) => {
+bootstrapApplication(App, appConfig).catch((err: unknown) => {
   console.error('❌ Error bootstrapping application:', err);
 });

@@ -36,6 +36,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { LoadingService } from '../../core/services/loading.service';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { UserPlaylist } from '../../core/models/artist.model';
+import { ApiError } from '../../core/models/api-response.model';
 
 /**
  * Playlist Action Type
@@ -81,16 +82,7 @@ export class PlaylistsComponent {
   
   // Resource API integration
   private playlistsResource = this.playlistService.getUserPlaylistsResource();
-  userPlaylists = computed<UserPlaylist[]>(() => {
-    const res = this.playlistsResource.value() as any;
-    if (!res) return [];
-    if (res.data && Array.isArray(res.data)) {
-      return res.data;
-    } else if (Array.isArray(res)) {
-      return res;
-    }
-    return [];
-  });
+  userPlaylists = computed<UserPlaylist[]>(() => this.playlistsResource.value()?.data ?? []);
   loadingPlaylists = computed(() => this.playlistsResource.isLoading());
   
   selectedPlaylistId = signal<string | null>(null);
@@ -197,7 +189,8 @@ export class PlaylistsComponent {
               this.lastOperation.set({ playlistId, action, timestamp: Date.now() });
             },
             error: (error) => {
-              const serverMessage = error?.error?.message;
+              const rawError: ApiError | string | undefined = error?.error?.error;
+              const serverMessage = typeof rawError === 'string' ? rawError : rawError?.message;
               this.notificationService.error(serverMessage || copy.error);
             },
           });

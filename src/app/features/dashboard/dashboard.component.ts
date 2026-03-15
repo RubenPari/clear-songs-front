@@ -40,7 +40,6 @@ import { LoadingService } from '../../core/services/loading.service';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { D3BarChartComponent } from '../../shared/components/d3-bar-chart/d3-bar-chart.component';
 import { SkeletonStatComponent, SkeletonTableComponent, SkeletonChartComponent } from '../../shared/components/skeleton/skeleton-components';
-import { TrackStore } from '../../core/stores/track.store';
 import { ArtistTracksModalComponent } from '../tracks/artist-tracks-modal.component';
 
 @Component({
@@ -65,7 +64,6 @@ export class DashboardComponent implements OnInit {
   private notificationService = inject(NotificationService);
   public loadingService = inject(LoadingService);
   private modalService = inject(NgbModal);
-  private trackStore = inject(TrackStore);
   private translate = inject(TranslateService);
 
   // Resource holding the data
@@ -100,16 +98,7 @@ export class DashboardComponent implements OnInit {
   isLoading = computed(() => this.trackSummaryResource.isLoading());
   
   // Create a computed signal for artists from the resource
-  artists = computed<ArtistSummary[]>(() => {
-    const res = this.trackSummaryResource.value() as any;
-    if (!res) return [];
-    if (res.data && Array.isArray(res.data)) {
-      return res.data as ArtistSummary[];
-    } else if (Array.isArray(res)) {
-      return res as ArtistSummary[];
-    }
-    return [];
-  });
+  artists = computed<ArtistSummary[]>(() => this.trackSummaryResource.value()?.data ?? []);
 
   totalTracks = computed(() => this.artists().reduce((sum, artist) => sum + artist.count, 0));
   totalArtists = computed(() => this.artists().length);
@@ -204,10 +193,11 @@ export class DashboardComponent implements OnInit {
     this.trackSummaryResource.reload();
   }
 
-  applyFilter(event?: any): void {
+  applyFilter(event?: Event): void {
     // Managed automatically by computed signal now, just update the signal if using template events
-    if (event && event.target) {
-      this.searchFilter.set(event.target.value);
+    const target = event?.target as HTMLInputElement | null;
+    if (target) {
+      this.searchFilter.set(target.value);
     }
   }
 

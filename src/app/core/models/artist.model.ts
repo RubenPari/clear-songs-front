@@ -40,9 +40,9 @@ export interface ArtistSummary {
  * Represents a simplified playlist object with essential information
  * for display and selection purposes.
  * 
- * @interface Playlist
+ * @interface PlaylistRecord
  */
-export interface Playlist {
+export interface PlaylistRecord {
   /** Unique identifier for the playlist (Spotify ID) */
   id: string;
   
