@@ -23,7 +23,7 @@ export const appConfig: ApplicationConfig = {
     importProvidersFrom(NgbModule),
     importProvidersFrom(
       TranslateModule.forRoot({
-        defaultLanguage: 'en',
+        fallbackLang: 'en',
         loader: {
           provide: TranslateLoader,
           useClass: TranslateHttpLoader

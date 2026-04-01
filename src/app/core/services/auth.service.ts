@@ -1,37 +1,7 @@
-/**
- * Authentication Service
- *
- * Central service for managing user authentication and session state.
- * This service handles all authentication-related operations including:
- * - Spotify OAuth login flow
- * - Session validation
- * - User logout
- * - Authentication state management using Angular Signals
- *
- * The service uses Angular Signals (Angular 16+) for reactive state management,
- * providing better performance and simpler API compared to RxJS BehaviorSubjects.
- *
- * Authentication Flow:
- * 1. User clicks login -> redirects to backend /auth/login
- * 2. Backend redirects to Spotify OAuth
- * 3. User authorizes -> Spotify redirects to /auth/callback with code
- * 4. Backend exchanges code for token -> redirects to frontend /callback
- * 5. Frontend calls handleCallback() -> validates session
- * 6. User is authenticated -> redirected to dashboard
- *
- * State Management:
- * - Uses signals for reactive authentication state
- * - Automatically checks auth status on service initialization
- * - Syncs with localStorage for persistence across page refreshes
- *
- * @service
- * @providedIn root
- * @author Clear Songs Development Team
- */
 import { Injectable, inject, Injector, signal, effect, computed } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { environment } from '../../../environments/environment';
-import { Observable, tap, filter, map, take, switchMap, catchError, of } from 'rxjs';
+import { Observable, tap, filter, map, take } from 'rxjs';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { ApiResponse, User } from '../models/api-response.model';
@@ -66,7 +36,7 @@ export class AuthService {
       const session = this.sessionResource.value();
       const isAuth = !!session?.success;
       const status = this.sessionResource.status();
-      
+
       if (isAuth) {
         localStorage.setItem('isAuthenticated', 'true');
         this._currentUser.set(session?.data?.user ?? null);
@@ -93,50 +63,13 @@ export class AuthService {
   }
 
   logout(): Observable<ApiResponse> {
-    return this.http.post<ApiResponse>(`${this.apiUrl}/local-auth/logout`, {}).pipe(
-      switchMap((localLogoutResponse) =>
-        this.http.get<ApiResponse>(`${this.apiUrl}/auth/logout`).pipe(
-          map(() => localLogoutResponse),
-          catchError(() => of(localLogoutResponse))
-        )
-      ),
+    return this.http.get<ApiResponse>(`${this.apiUrl}/auth/logout`).pipe(
       tap(() => {
         localStorage.removeItem('isAuthenticated');
         this.sessionResource.reload();
         this.router.navigate(['/login']);
       }),
     );
-  }
-
-  register(data: { email: string; password: string }): Observable<ApiResponse<{ message?: string }>> {
-    return this.http.post<ApiResponse<{ message?: string }>>(`${this.apiUrl}/local-auth/register`, data);
-  }
-
-  localLogin(data: { email: string; password: string }): Observable<ApiResponse<{ user?: User }>> {
-    return this.http.post<ApiResponse<{ user?: User }>>(`${this.apiUrl}/local-auth/login`, data).pipe(
-      tap((res) => {
-        if (res.success) {
-          localStorage.setItem('isAuthenticated', 'true');
-          this.sessionResource.reload();
-        }
-      })
-    );
-  }
-
-  confirmEmail(token: string): Observable<ApiResponse<{ message?: string }>> {
-    return this.http.get<ApiResponse<{ message?: string }>>(`${this.apiUrl}/local-auth/confirm-email?token=${token}`);
-  }
-
-  forgotPassword(email: string): Observable<ApiResponse<{ message?: string }>> {
-    return this.http.post<ApiResponse<{ message?: string }>>(`${this.apiUrl}/local-auth/forgot-password`, { email });
-  }
-
-  resetPassword(data: { token: string; newPassword: string }): Observable<ApiResponse> {
-    return this.http.post<ApiResponse>(`${this.apiUrl}/local-auth/reset-password`, data);
-  }
-
-  changePassword(data: { oldPassword: string; newPassword: string }): Observable<ApiResponse> {
-    return this.http.post<ApiResponse>(`${this.apiUrl}/local-auth/change-password`, data);
   }
 
   checkAuthStatus(): Observable<boolean> {

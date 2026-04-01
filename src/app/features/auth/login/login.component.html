@@ -1,49 +1,62 @@
-<div class="auth-container">
-  <div class="auth-card">
-    <div class="logo-container">
-      <i class="bi bi-music-note-beamed text-primary"></i>
-      <h2>Clear Songs</h2>
-      <p class="text-secondary mt-2">Manage your Spotify library efficiently</p>
-    </div>
-
-    <div *ngIf="errorMsg" class="alert alert-danger">{{ errorMsg }}</div>
-
-    <form [formGroup]="loginForm" (ngSubmit)="onLocalLogin()">
-      <div class="mb-3">
-        <label class="form-label text-light">Email address</label>
-        <input type="email" class="form-control" formControlName="email" placeholder="name@example.com">
-      </div>
-      <div class="mb-3">
-        <label class="form-label text-light d-flex justify-content-between">
-          Password
-          <a routerLink="/forgot-password" class="text-primary text-decoration-none small">Forgot?</a>
-        </label>
-        <input type="password" class="form-control" formControlName="password" placeholder="Password">
-      </div>
-
-      <button type="submit" class="btn btn-primary w-100 py-2 mb-3 fw-bold" [disabled]="loginForm.invalid || isLoading">
-        <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-        Login
-      </button>
-    </form>
-
-    <div class="divider d-flex align-items-center my-4">
-      <hr class="flex-grow-1 border-secondary">
-      <span class="px-3 text-secondary small text-uppercase">or</span>
-      <hr class="flex-grow-1 border-secondary">
-    </div>
-
-    <button class="btn btn-spotify w-100 py-2 mb-3 fw-bold d-flex align-items-center justify-content-center gap-2" (click)="loginWithSpotify()">
-      <i class="bi bi-spotify fs-5"></i>
-      Continue with Spotify
-    </button>
-
-    <div class="text-center mt-3">
-      <p class="text-secondary">Don't have an account? <a routerLink="/register" class="text-primary text-decoration-none">Register</a></p>
-    </div>
+<div class="login-container">
+  <div class="login-background">
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+    <div class="gradient-orb orb-3"></div>
   </div>
 
-  <div class="features-grid mt-5">
-    <!-- features list removed for brevity, keep existing styles -->
+  <div class="login-content">
+    <div class="login-card">
+      <div class="logo-section">
+        <div class="app-logo">
+          <div class="logo-glow"></div>
+          <div class="logo-ring"></div>
+          <i class="bi bi-music-note-beamed logo-icon text-primary"></i>
+        </div>
+        <h1>Clear Songs</h1>
+        <p class="tagline">Manage your Spotify library efficiently</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="bi bi-trash3"></i></div>
+          <div class="feature-content">
+            <h6>Bulk Delete</h6>
+            <p>Remove tracks by artist or range</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="bi bi-bar-chart"></i></div>
+          <div class="feature-content">
+            <h6>Library Stats</h6>
+            <p>Analyze your music collection</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="bi bi-collection"></i></div>
+          <div class="feature-content">
+            <h6>Playlists</h6>
+            <p>Clean up playlists easily</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="bi bi-shield-check"></i></div>
+          <div class="feature-content">
+            <h6>Safe Backup</h6>
+            <p>Auto-backup before deletion</p>
+          </div>
+        </div>
+      </div>
+
+      <button class="spotify-login-btn" (click)="loginWithSpotify()">
+        <i class="bi bi-spotify"></i>
+        Continue with Spotify
+      </button>
+
+      <div class="disclaimer">
+        <i class="bi bi-info-circle"></i>
+        <span>You'll be redirected to Spotify to authorize Clear Songs to access your library.</span>
+      </div>
+    </div>
   </div>
 </div>

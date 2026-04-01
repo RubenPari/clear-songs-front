@@ -30,8 +30,8 @@
  * @author Clear Songs Development Team
  */
 import { inject } from '@angular/core';
-import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
-import { catchError, throwError } from 'rxjs';
+import { HttpInterceptorFn, HttpErrorResponse, HttpResponse } from '@angular/common/http';
+import { catchError, throwError, of } from 'rxjs';
 import { Router } from '@angular/router';
 import { NotificationService } from '../services/notification.service';
 
@@ -92,13 +92,16 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
        * when the user is not authenticated.
        */
       if (error.status === 401) {
-        // Don't show error or redirect for auth status check endpoint
         const isAuthCheck = request.url.includes('/auth/is-auth');
-        
-        if (!isAuthCheck) {
-          notificationService.error('Session expired. Please login again.');
-          router.navigate(['/login']);
+
+        if (isAuthCheck) {
+          // Return a resolved response with success: false so httpResource
+          // handles it gracefully instead of surfacing an unhandled error
+          return of(new HttpResponse({ status: 200, body: { success: false } }));
         }
+
+        notificationService.error('Session expired. Please login again.');
+        router.navigate(['/login']);
       } 
       /**
        * 500 Internal Server Error
