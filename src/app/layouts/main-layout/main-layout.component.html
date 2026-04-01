@@ -99,9 +99,6 @@
           <button class="btn btn-icon" (click)="switchLanguage()" [title]="currentLang() === 'en' ? 'Italiano' : 'English'">
             <span style="font-size: 1.1rem;">{{ currentLang() === 'en' ? '🇮🇹' : '🇬🇧' }}</span>
           </button>
-          <button class="btn btn-icon" (click)="toggleTheme()" [title]="isDarkTheme() ? 'Switch to light theme' : 'Switch to dark theme'">
-            <i class="bi" [class.bi-sun-fill]="isDarkTheme()" [class.bi-moon-fill]="!isDarkTheme()"></i>
-          </button>
           <div class="dropdown">
             <button class="btn btn-user" type="button" data-bs-toggle="dropdown" aria-expanded="false">
               @if (authService.currentUser()?.profile_image) {
