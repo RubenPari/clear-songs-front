@@ -6,18 +6,13 @@
  * from both playlists and the user's library.
  * 
  * Features:
- * - Playlist ID input with validation (alphanumeric, min 10 characters)
- * - Quick sample playlists for testing
+ * - Visual playlist selection from user's library
  * - Two operation modes:
  *   1. Clear playlist only (tracks remain in library)
  *   2. Clear playlist AND library (tracks removed from both, with backup)
  * - Operation history tracking
  * - Confirmation dialogs for destructive operations
  * - Loading states and error handling
- * 
- * The component uses reactive forms with typed FormGroup for type safety and
- * proper validation. All HTTP operations are properly managed with takeUntilDestroyed()
- * to prevent memory leaks.
  * 
  * @component
  * @selector app-playlists
@@ -26,7 +21,6 @@
  */
 import { Component, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { finalize } from 'rxjs/operators';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -43,15 +37,6 @@ import { ApiError } from '../../core/models/api-response.model';
  */
 type PlaylistAction = 'playlist' | 'playlistAndLibrary';
 
-interface PlaylistForm {
-  playlistId: FormControl<string | null>;
-}
-
-interface SamplePlaylist {
-  readonly label: string;
-  readonly id: string;
-}
-
 @Component({
   selector: 'app-playlists',
   templateUrl: './playlists.component.html',
@@ -59,7 +44,6 @@ interface SamplePlaylist {
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule,
     TranslateModule
   ],
 })
@@ -68,26 +52,16 @@ export class PlaylistsComponent {
   private notificationService = inject(NotificationService);
   public loadingService = inject(LoadingService);
   private modalService = inject(NgbModal);
-  private fb = inject(FormBuilder);
   private translate = inject(TranslateService);
-
-  playlistForm: FormGroup<PlaylistForm>;
-  readonly samplePlaylists: readonly SamplePlaylist[] = [
-    { label: 'Discover Weekly', id: '37i9dQZF1DWXRqgorJj26U' },
-    { label: 'Focus Flow', id: '37i9dQZF1DXcBWIGoYBM5M' },
-    { label: 'Road Trip', id: '0OtO7pGz4WxZmf0RduCMJL' },
-  ] as const;
 
   lastOperation = signal<{ playlistId: string; action: PlaylistAction; timestamp: number } | undefined>(undefined);
   
-  // Resource API integration
   private playlistsResource = this.playlistService.getUserPlaylistsResource();
   userPlaylists = computed<UserPlaylist[]>(() => this.playlistsResource.value()?.data ?? []);
   loadingPlaylists = computed(() => this.playlistsResource.isLoading());
   
   selectedPlaylistId = signal<string | null>(null);
 
-  // Use a computed to translate action strings dynamically
   private actionCopy = computed(() => ({
     playlist: {
       title: this.translate.instant('PLAYLISTS.ACTION_CLEAR_TITLE'),
@@ -106,18 +80,6 @@ export class PlaylistsComponent {
   }));
 
   constructor() {
-    this.playlistForm = this.fb.group({
-      playlistId: [
-        '',
-        [
-          Validators.required,
-          Validators.pattern(/^[A-Za-z0-9]+$/),
-          Validators.minLength(10),
-        ],
-      ],
-    });
-
-    // Notify error if resource fails
     effect(() => {
       if (this.playlistsResource.error()) {
         this.notificationService.error(this.translate.instant('PLAYLISTS.LOAD_ERROR'));
@@ -125,34 +87,16 @@ export class PlaylistsComponent {
     });
   }
 
-  /**
-   * Selects a playlist from the card grid
-   */
   selectPlaylist(playlist: UserPlaylist): void {
     this.selectedPlaylistId.set(playlist.id);
-    this.playlistForm.patchValue({ playlistId: playlist.id });
-  }
-
-  get playlistIdControl() {
-    return this.playlistForm.get('playlistId');
-  }
-
-  fillExample(id: string): void {
-    this.playlistForm.patchValue({ playlistId: id });
   }
 
   resetForm(): void {
-    this.playlistForm.reset();
     this.selectedPlaylistId.set(null);
   }
 
   handleAction(action: PlaylistAction): void {
-    if (this.playlistForm.invalid) {
-      this.playlistForm.markAllAsTouched();
-      return;
-    }
-
-    const playlistId = this.playlistIdControl?.value?.trim();
+    const playlistId = this.selectedPlaylistId();
     if (!playlistId) {
       return;
     }
@@ -187,6 +131,7 @@ export class PlaylistsComponent {
             next: () => {
               this.notificationService.success(copy.success);
               this.lastOperation.set({ playlistId, action, timestamp: Date.now() });
+              this.selectedPlaylistId.set(null);
             },
             error: (error) => {
               const rawError: ApiError | string | undefined = error?.error?.error;

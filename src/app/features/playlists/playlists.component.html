@@ -34,101 +34,52 @@
           </div>
         </div>
         <div class="card-body-modern">
-          <form [formGroup]="playlistForm">
-            @if (loadingPlaylists()) {
-              <div class="playlists-loading">
-                <div class="spinner-border spinner-border-sm text-primary" role="status">
-                  <span class="visually-hidden">{{ 'COMMON.LOADING' | translate }}</span>
-                </div>
-                <span class="loading-text">{{ 'PLAYLISTS.LOADING_PLAYLISTS' | translate }}</span>
+          @if (loadingPlaylists()) {
+            <div class="playlists-loading">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">{{ 'COMMON.LOADING' | translate }}</span>
               </div>
-            }
+              <span class="loading-text">{{ 'PLAYLISTS.LOADING_PLAYLISTS' | translate }}</span>
+            </div>
+          }
 
-            @if (!loadingPlaylists() && userPlaylists().length > 0) {
-              <div class="playlists-section">
-                <label class="section-label">{{ 'PLAYLISTS.SELECT_PLAYLIST' | translate }}</label>
-                <p class="section-description">{{ 'PLAYLISTS.SELECT_DESC' | translate }}</p>
-                <div class="playlists-grid">
-                  @for (playlist of userPlaylists(); track playlist.id) {
-                    <button
-                      type="button"
-                      class="playlist-card"
-                      [class.selected]="selectedPlaylistId() === playlist.id"
-                      (click)="selectPlaylist(playlist)"
-                    >
-                      <div class="playlist-image-wrapper">
-                        @if (playlist.image_url) {
-                          <img [src]="playlist.image_url" [alt]="playlist.name" class="playlist-image" (error)="playlist.image_url = undefined" />
-                        } @else {
-                          <div class="playlist-image-placeholder">
-                            <i class="bi bi-music-note-list"></i>
-                          </div>
-                        }
-                        @if (selectedPlaylistId() === playlist.id) {
-                          <div class="playlist-selected-badge">
-                            <i class="bi bi-check-circle-fill"></i>
-                          </div>
-                        }
-                      </div>
-                      <div class="playlist-name">{{ playlist.name }}</div>
-                    </button>
-                  }
-                </div>
-              </div>
-
-              <div class="divider-with-text">
-                <span>{{ 'PLAYLISTS.OR' | translate }}</span>
-              </div>
-            }
-
-            <div class="form-group-modern">
-              <label class="form-label-modern">{{ 'PLAYLISTS.MANUAL_LABEL' | translate }}</label>
-              <div class="input-wrapper">
-                <input
-                  type="text"
-                  class="form-control-modern"
-                  formControlName="playlistId"
-                  placeholder="37i9dQZF1DXcBWIGoYBM5M"
-                  autocomplete="off"
-                  [class.is-invalid]="playlistIdControl?.invalid && playlistIdControl?.touched"
-                />
-                @if (playlistIdControl?.value) {
+          @if (!loadingPlaylists() && userPlaylists().length > 0) {
+            <div class="playlists-section">
+              <label class="section-label">{{ 'PLAYLISTS.SELECT_PLAYLIST' | translate }}</label>
+              <p class="section-description">{{ 'PLAYLISTS.SELECT_DESC' | translate }}</p>
+              <div class="playlists-grid">
+                @for (playlist of userPlaylists(); track playlist.id) {
                   <button
-                    class="btn-clear-input"
                     type="button"
-                    aria-label="Clear playlist id"
-                    (click)="playlistForm.patchValue({ playlistId: '' }); selectedPlaylistId.set(null)"
+                    class="playlist-card"
+                    [class.selected]="selectedPlaylistId() === playlist.id"
+                    (click)="selectPlaylist(playlist)"
                   >
-                    <i class="bi bi-x-lg"></i>
+                    <div class="playlist-image-wrapper">
+                      @if (playlist.image_url) {
+                        <img [src]="playlist.image_url" [alt]="playlist.name" class="playlist-image" (error)="playlist.image_url = undefined" />
+                      } @else {
+                        <div class="playlist-image-placeholder">
+                          <i class="bi bi-music-note-list"></i>
+                        </div>
+                      }
+                      @if (selectedPlaylistId() === playlist.id) {
+                        <div class="playlist-selected-badge">
+                          <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                      }
+                    </div>
+                    <div class="playlist-name">{{ playlist.name }}</div>
                   </button>
                 }
               </div>
-              <div class="form-help-text">{{ 'PLAYLISTS.MANUAL_HELP' | translate }}</div>
-              @if (playlistIdControl?.hasError('required') && playlistIdControl?.touched) {
-                <div class="error-message">
-                  <i class="bi bi-exclamation-circle me-1"></i>
-                  {{ 'PLAYLISTS.ERR_REQUIRED' | translate }}
-                </div>
-              }
-              @if (playlistIdControl?.hasError('pattern') && playlistIdControl?.touched) {
-                <div class="error-message">
-                  <i class="bi bi-exclamation-circle me-1"></i>
-                  {{ 'PLAYLISTS.ERR_PATTERN' | translate }}
-                </div>
-              }
-              @if (playlistIdControl?.hasError('minlength') && playlistIdControl?.touched) {
-                <div class="error-message">
-                  <i class="bi bi-exclamation-circle me-1"></i>
-                  {{ 'PLAYLISTS.ERR_MINLENGTH' | translate }}
-                </div>
-              }
             </div>
 
             <div class="actions-section">
               <button
                 class="btn-action btn-action-primary"
                 type="button"
-                [disabled]="playlistForm.invalid || loadingService.loading()"
+                [disabled]="!selectedPlaylistId() || loadingService.loading()"
                 (click)="handleAction('playlist')"
               >
                 <i class="bi bi-playlist-x"></i>
@@ -137,7 +88,7 @@
               <button
                 class="btn-action btn-action-danger"
                 type="button"
-                [disabled]="playlistForm.invalid || loadingService.loading()"
+                [disabled]="!selectedPlaylistId() || loadingService.loading()"
                 (click)="handleAction('playlistAndLibrary')"
                 [title]="'PLAYLISTS.DETAIL_CLEAR_LIB_DESC' | translate"
               >
@@ -145,7 +96,7 @@
                 <span>{{ 'PLAYLISTS.BTN_CLEAR_LIB' | translate }}</span>
               </button>
             </div>
-          </form>
+          }
         </div>
       </div>
     </div>
