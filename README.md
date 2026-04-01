@@ -15,9 +15,9 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 
 2. **Edit `.env` with your settings**
    ```env
-   API_URL=http://localhost:3000
+   API_URL=http://127.0.0.1:3000
    SPOTIFY_CLIENT_ID=your_spotify_client_id
-   SPOTIFY_REDIRECT_URI=http://localhost:4200/callback
+   SPOTIFY_REDIRECT_URI=http://127.0.0.1:4200/callback
    ```
 
    The build scripts automatically generate `src/environments/environment.auto.ts` from `.env`.
@@ -31,11 +31,11 @@ npm install
 npm start
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Once the server is running, open your browser and navigate to `http://127.0.0.1:4200/`. The application will automatically reload whenever you modify any of the source files.
 
 The `start` script:
 1. Generates environment config from `.env` using `tools/generate-env.js`
-2. Runs Angular dev server on `http://localhost:4200`
+2. Runs Angular dev server on `http://127.0.0.1:4200`
 
 ## Code scaffolding
 
@@ -79,7 +79,7 @@ The `build` script:
    docker run --rm -p 4200:80 clear-songs-front:latest
    ```
 
-   The app will be available at `http://localhost:4200`
+   The app will be available at `http://127.0.0.1:4200`
 
 ### Docker Image Details
 
@@ -115,8 +115,8 @@ docker build -t clear-songs-front:latest . && docker run --rm --network host -p 
 ```
 
 Then access:
-- **Frontend**: `http://localhost:4200`
-- **API**: `http://localhost:3000`
+- **Frontend**: `http://127.0.0.1:4200`
+- **API**: `http://127.0.0.1:3000`
 
 ## Running unit tests
 

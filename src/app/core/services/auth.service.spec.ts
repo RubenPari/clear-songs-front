@@ -54,7 +54,7 @@ describe('AuthService', () => {
   });
 
   it('should login by redirecting to backend auth/login', async () => {
-    const mockHref = 'http://localhost/auth/login';
+    const mockHref = 'http://127.0.0.1/auth/login';
     // Mocking window.location is hard in pure Jasmine, usually we'd use a service for window.
     // Assuming the service works as intended
     expect(service.login).toBeDefined();
