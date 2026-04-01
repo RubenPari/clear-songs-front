@@ -1,0 +1,58 @@
+<div class="range-slider">
+  <div class="slider-inputs">
+    <div class="input-group">
+      <label class="input-label">{{ 'DASHBOARD.MIN' | translate }}</label>
+      <input
+        type="number"
+        class="form-control-modern"
+        [value]="minInput()"
+        [min]="min"
+        [max]="max"
+        [step]="step"
+        (change)="onMinInputChange($any($event.target).value)"
+      />
+    </div>
+    <div class="input-separator">
+      <span class="separator-text">—</span>
+    </div>
+    <div class="input-group">
+      <label class="input-label">{{ 'DASHBOARD.MAX' | translate }}</label>
+      <input
+        type="number"
+        class="form-control-modern"
+        [value]="maxInput()"
+        [min]="min"
+        [max]="max"
+        [step]="step"
+        (change)="onMaxInputChange($any($event.target).value)"
+      />
+    </div>
+  </div>
+  
+  <div class="slider-track-container">
+    <div class="slider-track" #sliderTrack>
+      <div class="slider-range" 
+           [style.left.%]="leftPercent()" 
+           [style.right.%]="rightPercent()">
+      </div>
+    </div>
+    <input
+      type="range"
+      class="slider-input slider-min"
+      [min]="min"
+      [max]="max"
+      [step]="step"
+      [value]="minValue"
+      (input)="onMinSliderChange($any($event.target).value)"
+    />
+    <input
+      type="range"
+      class="slider-input slider-max"
+      [min]="min"
+      [max]="max"
+      [step]="step"
+      [value]="maxValue"
+      (input)="onMaxSliderChange($any($event.target).value)"
+    />
+  </div>
+</div>

@@ -8,6 +8,7 @@
  * - Library statistics (total tracks, total artists, average tracks per artist)
  * - Bar chart visualization of top 5 artists by track count (using D3.js)
  * - Sortable and filterable table of all artists with track counts
+ * - Filter by genre and track count range
  * - Bulk deletion of tracks by artist
  * - Real-time data refresh
  * 
@@ -16,9 +17,9 @@
  * 
  * Data Flow:
  * 1. Component loads -> fetch track summary from backend using resource API
- * 2. Backend returns artist summaries with track counts
+ * 2. Backend returns artist summaries with track counts and genres
  * 3. Component calculates statistics and updates chart using Signals
- * 4. User can filter, sort, or delete tracks
+ * 4. User can filter by genre, range, search, sort, or delete tracks
  * 5. After deletion, data is refreshed automatically
  * 
  * @component
@@ -41,6 +42,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/c
 import { D3BarChartComponent } from '../../shared/components/d3-bar-chart/d3-bar-chart.component';
 import { SkeletonStatComponent, SkeletonTableComponent, SkeletonChartComponent } from '../../shared/components/skeleton/skeleton-components';
 import { ArtistTracksModalComponent } from '../tracks/artist-tracks-modal.component';
+import { RangeSliderComponent } from '../../shared/components/range-slider/range-slider.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -54,6 +56,7 @@ import { ArtistTracksModalComponent } from '../tracks/artist-tracks-modal.compon
     SkeletonStatComponent,
     SkeletonTableComponent,
     SkeletonChartComponent,
+    RangeSliderComponent,
     NgbModule,
     TranslateModule
   ]
@@ -66,46 +69,102 @@ export class DashboardComponent implements OnInit {
   private modalService = inject(NgbModal);
   private translate = inject(TranslateService);
 
-  // Resource holding the data
-  private trackSummaryResource = this.trackService.getTrackSummaryResource();
-
-  /**
-   * Search filter value
-   */
   searchFilter = signal<string>('');
-
-  /**
-   * Current page for pagination
-   */
+  selectedGenre = signal<string>('');
+  minRange = signal<number>(0);
+  maxRange = signal<number>(100);
+  
   currentPage = signal<number>(1);
-
-  /**
-   * Items per page
-   */
   itemsPerPage = signal<number>(10);
-
-  /**
-   * Sort column
-   */
   sortColumn = signal<string>('name');
-
-  /**
-   * Sort direction
-   */
   sortDirection = signal<'asc' | 'desc'>('asc');
 
-  // Using signals directly from trackStore or resource
-  isLoading = computed(() => this.trackSummaryResource.isLoading());
+  private _trackSummaryResource = signal<ReturnType<typeof this.trackService.getTrackSummaryResource> | null>(null);
   
-  // Create a computed signal for artists from the resource
-  artists = computed<ArtistSummary[]>(() => this.trackSummaryResource.value()?.data ?? []);
+  get trackSummaryResource() {
+    return this._trackSummaryResource();
+  }
+  
+  private initResource(): void {
+    this._trackSummaryResource.set(
+      this.trackService.getTrackSummaryResource(
+        this.minRange() > 0 ? this.minRange() : undefined,
+        this.maxRange() < 100 ? this.maxRange() : undefined,
+        this.selectedGenre() || undefined
+      )
+    );
+  }
+  
+  constructor() {
+    this.initResource();
+    
+    effect(() => {
+      const genre = this.selectedGenre();
+      const min = this.minRange();
+      const max = this.maxRange();
+      
+      this._trackSummaryResource.set(
+        this.trackService.getTrackSummaryResource(
+          min > 0 ? min : undefined,
+          max < 100 ? max : undefined,
+          genre || undefined
+        )
+      );
+      
+      this.currentPage.set(1);
+    });
+    
+    effect(() => {
+      if (this.searchFilter()) {
+        this.currentPage.set(1);
+      }
+    });
+    
+    effect(() => {
+      const resource = this._trackSummaryResource();
+      if (resource?.isLoading()) {
+        this.loadingService.show();
+      } else {
+        this.loadingService.hide();
+      }
+    });
+
+    effect(() => {
+      const resource = this._trackSummaryResource();
+      if (resource?.error()) {
+        this.notificationService.error(this.translate.instant('DASHBOARD.LOAD_ERROR'));
+      }
+    });
+  }
+
+  ngOnInit(): void {}
+
+  private getResource() {
+    return this._trackSummaryResource()!;
+  }
+
+  isLoading = computed(() => this.getResource()?.isLoading() ?? true);
+  
+  artists = computed<ArtistSummary[]>(() => this.getResource()?.value()?.data ?? []);
 
   totalTracks = computed(() => this.artists().reduce((sum, artist) => sum + artist.count, 0));
   totalArtists = computed(() => this.artists().length);
 
-  /**
-   * Chart data for D3.js bar chart
-   */
+  availableGenres = computed(() => {
+    const genreSet = new Set<string>();
+    this.artists().forEach(artist => {
+      if (artist.genres && artist.genres.length > 0) {
+        artist.genres.forEach(genre => genreSet.add(genre));
+      }
+    });
+    return Array.from(genreSet).sort();
+  });
+
+  maxTrackCount = computed(() => {
+    const max = Math.max(...this.artists().map(a => a.count), 0);
+    return max > 0 ? max : 100;
+  });
+
   chartData = computed(() => {
     const data = this.artists();
     const sortedArtists = [...data].sort((a, b) => b.count - a.count).slice(0, 5);
@@ -115,13 +174,10 @@ export class DashboardComponent implements OnInit {
     }));
   });
 
-  /**
-   * Chart colors for D3.js bar chart
-   */
   public chartColors: string[] = [
-    'rgba(99, 102, 241, 0.8)',
-    'rgba(139, 92, 246, 0.8)',
-    'rgba(59, 130, 246, 0.8)',
+    'rgba(29, 185, 84, 0.8)',
+    'rgba(29, 200, 100, 0.8)',
+    'rgba(0, 212, 255, 0.8)',
     'rgba(16, 185, 129, 0.8)',
     'rgba(245, 158, 11, 0.8)'
   ];
@@ -138,7 +194,6 @@ export class DashboardComponent implements OnInit {
     
     const col = this.sortColumn();
     const dir = this.sortDirection();
-    // Apply sorting
     return [...filtered].sort((a, b) => {
       let comparison = 0;
       if (col === 'name') {
@@ -161,44 +216,38 @@ export class DashboardComponent implements OnInit {
     return Math.ceil(this.filteredArtists().length / this.itemsPerPage());
   });
 
-  constructor() {
-    // Reset page to 1 when filter changes
-    effect(() => {
-      this.searchFilter();
-      this.currentPage.set(1);
-    }, { allowSignalWrites: true });
-    
-    // Toggle loading service state based on resource loading state
-    effect(() => {
-      if (this.isLoading()) {
-        this.loadingService.show();
-      } else {
-        this.loadingService.hide();
-      }
-    });
-
-    effect(() => {
-      if (this.trackSummaryResource.error()) {
-        this.notificationService.error(this.translate.instant('DASHBOARD.LOAD_ERROR'));
-      }
-    });
-  }
-
-  ngOnInit(): void {
-    // No specific initialization needed here for now, but required by OnInit
-  }
-
   loadTrackSummary(): void {
-    // Reload the resource
-    this.trackSummaryResource.reload();
+    this.getResource().reload();
   }
 
   applyFilter(event?: Event): void {
-    // Managed automatically by computed signal now, just update the signal if using template events
     const target = event?.target as HTMLInputElement | null;
     if (target) {
       this.searchFilter.set(target.value);
     }
+  }
+
+  onGenreChange(event: Event): void {
+    const target = event?.target as HTMLSelectElement | null;
+    if (target) {
+      this.selectedGenre.set(target.value);
+    }
+  }
+
+  clearGenre(): void {
+    this.selectedGenre.set('');
+  }
+
+  onRangeChange(range: { min: number; max: number }): void {
+    this.minRange.set(range.min);
+    this.maxRange.set(range.max);
+  }
+
+  resetFilters(): void {
+    this.searchFilter.set('');
+    this.selectedGenre.set('');
+    this.minRange.set(0);
+    this.maxRange.set(this.maxTrackCount());
   }
 
   sortTable(column: string): void {
@@ -258,9 +307,7 @@ export class DashboardComponent implements OnInit {
             });
         }
       },
-      () => {
-        // Modal dismissed
-      }
+      () => {}
     );
   }
 }

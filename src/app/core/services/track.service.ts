@@ -40,9 +40,9 @@ export class TrackService {
    * Fetches a summary of tracks using the modern httpResource API.
    * This automatically integrates with HttpClient, interceptors, and signals.
    */
-  getTrackSummaryResource(min?: number, max?: number) {
+  getTrackSummaryResource(min?: number, max?: number, genre?: string) {
     return httpResource<ApiResponse<ArtistSummary[]>>(() => {
-      const params = buildRangeParams(min, max);
+      const params = buildRangeParams(min, max, genre);
       return `${this.apiUrl}/summary?${params.toString()}`;
     });
   }

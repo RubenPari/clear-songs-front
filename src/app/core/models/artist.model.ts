@@ -32,6 +32,9 @@ export interface ArtistSummary {
   
   /** URL of the artist's profile image (optional) */
   image_url?: string;
+  
+  /** Array of genre names associated with the artist (optional) */
+  genres?: string[];
 }
 
 /**

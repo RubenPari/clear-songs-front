@@ -81,7 +81,7 @@
         </div>
       </div>
 
-      <div class="table-section">
+        <div class="table-section">
         <div class="modern-card">
           <div class="card-header-modern">
             <div class="card-header-content">
@@ -90,16 +90,56 @@
             </div>
           </div>
           <div class="card-body-modern">
-            <div class="search-container">
-              <div class="search-input-wrapper">
-                <i class="bi bi-search search-icon"></i>
-                <input
-                  type="text"
-                  class="form-control search-input"
-                  [placeholder]="'DASHBOARD.SEARCH_PLACEHOLDER' | translate"
-                  [value]="searchFilter()"
-                  (input)="applyFilter($event)"
-                />
+            <div class="filters-section">
+              <div class="filters-row">
+                <div class="search-container">
+                  <div class="search-input-wrapper">
+                    <i class="bi bi-search search-icon"></i>
+                    <input
+                      type="text"
+                      class="form-control search-input"
+                      [placeholder]="'DASHBOARD.SEARCH_PLACEHOLDER' | translate"
+                      [value]="searchFilter()"
+                      (input)="applyFilter($event)"
+                    />
+                  </div>
+                </div>
+                
+                <div class="genre-filter">
+                  <div class="select-wrapper">
+                    <i class="bi bi-music-note-list select-icon"></i>
+                    <select 
+                      class="form-select-modern" 
+                      [value]="selectedGenre()"
+                      (change)="onGenreChange($event)"
+                    >
+                      <option value="">{{ 'DASHBOARD.ALL_GENRES' | translate }}</option>
+                      @for (genre of availableGenres(); track genre) {
+                        <option [value]="genre">{{ genre }}</option>
+                      }
+                    </select>
+                    @if (selectedGenre()) {
+                      <button class="btn-clear-select" (click)="clearGenre()" type="button">
+                        <i class="bi bi-x"></i>
+                      </button>
+                    }
+                  </div>
+                </div>
+                
+                <button class="btn btn-reset-filters" (click)="resetFilters()" type="button">
+                  <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
+              </div>
+              
+              <div class="range-filter">
+                <app-range-slider
+                  [min]="0"
+                  [max]="maxTrackCount()"
+                  [step]="1"
+                  [minValue]="minRange()"
+                  [maxValue]="maxRange()"
+                  (rangeChange)="onRangeChange($event)"
+                ></app-range-slider>
               </div>
             </div>
 
