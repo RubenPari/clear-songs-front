@@ -27,7 +27,7 @@
  * @standalone true
  * @author Clear Songs Development Team
  */
-import { Component, OnInit, computed, inject, signal, effect } from '@angular/core';
+import { Component, OnInit, computed, inject, signal, effect, Injector, runInInjectionContext } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -62,7 +62,7 @@ import { RangeSliderComponent } from '../../shared/components/range-slider/range
   ]
 })
 export class DashboardComponent implements OnInit {
-
+  private injector = inject(Injector);
   private trackService = inject(TrackService);
   private notificationService = inject(NotificationService);
   public loadingService = inject(LoadingService);
@@ -87,10 +87,12 @@ export class DashboardComponent implements OnInit {
   
   private initResource(): void {
     this._trackSummaryResource.set(
-      this.trackService.getTrackSummaryResource(
-        this.minRange() > 0 ? this.minRange() : undefined,
-        this.maxRange() < 100 ? this.maxRange() : undefined,
-        this.selectedGenre() || undefined
+      runInInjectionContext(this.injector, () =>
+        this.trackService.getTrackSummaryResource(
+          this.minRange() > 0 ? this.minRange() : undefined,
+          this.maxRange() < 100 ? this.maxRange() : undefined,
+          this.selectedGenre() || undefined
+        )
       )
     );
   }
@@ -104,10 +106,12 @@ export class DashboardComponent implements OnInit {
       const max = this.maxRange();
       
       this._trackSummaryResource.set(
-        this.trackService.getTrackSummaryResource(
-          min > 0 ? min : undefined,
-          max < 100 ? max : undefined,
-          genre || undefined
+        runInInjectionContext(this.injector, () =>
+          this.trackService.getTrackSummaryResource(
+            min > 0 ? min : undefined,
+            max < 100 ? max : undefined,
+            genre || undefined
+          )
         )
       );
       
