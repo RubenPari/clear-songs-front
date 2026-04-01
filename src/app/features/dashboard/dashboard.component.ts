@@ -157,8 +157,8 @@ export class DashboardComponent implements OnInit {
   availableGenres = computed(() => {
     const genreSet = new Set<string>();
     this.artists().forEach(artist => {
-      if (artist.genres && artist.genres.length > 0) {
-        artist.genres.forEach(genre => genreSet.add(genre));
+      if (artist.genre) {
+        genreSet.add(artist.genre);
       }
     });
     return Array.from(genreSet).sort();

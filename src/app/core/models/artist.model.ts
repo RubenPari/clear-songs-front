@@ -35,6 +35,9 @@ export interface ArtistSummary {
   
   /** Array of genre names associated with the artist (optional) */
   genres?: string[];
+
+  /** Resolved canonical genre (e.g., "Hip Hop", "Rock", "Electronic") */
+  genre?: string;
 }
 
 /**
